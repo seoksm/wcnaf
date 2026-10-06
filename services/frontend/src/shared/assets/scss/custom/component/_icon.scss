@@ -1,0 +1,179 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+@mixin ico_func($name, $x, $y, $size) {
+	&.ico-#{$name} {
+		@include ico_posi($x, $y, $size);
+	}
+}
+
+@mixin ico_list($size) {
+	$icons: 
+		download,    upload,     login,      logout,     plus,       minus,      check,         close,       back,         forward,   
+		up,          down,       left,       right,      first,      last,       pause,         play,        play2,        refresh,   
+		refresh1,    refresh2,   del,        copy,       home,       search,     power,         link,        linkin,       url,       
+		share,       net,        folder,     folder2,    file2,      camera,     video,         film,        file,         call,      
+		cal,         cal2,       checkreset, time,       time2,      mail,       mail2,         chat,        print,        qr,        
+		lock,        unlock,     user,       setting,    menu,       setting2,   alarm,         alarm_no,    alarm2,       alarm2_no, 
+		alert,       info,       info2,      guard,      guard2,     cloud,      cloud_refresh, cloud_close, cloud_upload, cloud_download,
+		util,        util2,      doc,        doc_check,  doc_close,  doc_stamp,  mic,           sound,       mute,         noti,      
+		edu,         stamp,      fav,        fav2,       like,       like2,      chart,         chart2,      chart3,       triangle,          
+		equal,       capture,    equipment,  edu2,       location,   reply,      bookmark,      "",          "",           "",          
+		blog,        facebook,   sns_x,      band,       kakaotalk,  print2,     img,           excel,       "",           "";
+
+	@for $i from 1 through length($icons) {
+		$name: nth($icons, $i);
+		@if $name != "" and $name != null { // 빈 값과 null 값 무시
+			$x: ($i - 1) % 10;
+			$y: floor(($i - 1) / 10);
+			@include ico_func($name, $x, $y, $size);
+		}
+	}
+}
+
+  //icoMatrix는 _mixin.scss에 정의되어있음
+  @mixin ico_size($val : 1, $type : list){
+	@include btnIco ($icoPos : icon, $btnSize : get(ico, default) * $val, $icoSize : get(ico, default) * $val);
+  
+	@if $type == list{
+	  @include ico_list(get(ico, default) * $val);
+	}
+  }
+  
+  @mixin ico_posi($x, $y, $size : get(ico, default), $spot: before){
+	&::#{$spot} {
+	  @include icoMatrix($x, $y, $size);
+	  @include ico_color(white);
+	}
+  
+	&.co-main {
+	  &::before {
+		@include ico_color(main);
+	  }
+	}
+  
+	&.co-sub {
+	  &::before {
+		@include ico_color(sub);
+	  }
+	}
+
+	&.co-sub2 {
+	  &::before {
+		@include ico_color(sub2);
+	  }
+	}
+
+	&.co-sub3 {
+	  &::before {
+		@include ico_color(sub3);
+	  }
+	}
+  
+	&.co-gray {
+	  &::before {
+		@include ico_color(gray);
+	  }
+	}
+  
+	&.co-light-gray {
+	  &::before {
+		@include ico_color(light-gray);
+	  }
+	}
+  
+	&.co-dark {
+	  &::before {
+		@include ico_color(dark);
+	  }
+	}
+	&.co-dark-gray {
+	  &::before {
+		@include ico_color(dark-gray);
+	  }
+	}
+	&.co-light {
+	  &::before {
+		@include ico_color(light);
+	  }
+	}
+	&.co-black {
+	  &::before {
+		@include ico_color(black);
+	  }
+	}
+	&.co-del {
+	  &::before {
+		@include ico_color(del);
+	  }
+	}
+	&.co-main-dark{
+		&::before{
+			@include ico_color(main-dark);
+		}
+	}
+	&.co-light-gray2{
+		&::before{
+			@include ico_color(light-gray2);
+		}
+	}
+	&.co-red{
+		&::before{
+			@include ico_color(red);
+		}
+	}
+	&.co-excel{
+		&::before{
+			@include ico_color(excel);
+		}
+	}
+  }
+  
+.item-ico {
+	display: inline-block; 
+	vertical-align: middle;
+  
+	.btn-comm &,
+	.btn-basic &,
+	span & {
+	  margin: 0 get(margin, small) 0 0;
+	  vertical-align: middle;
+  
+	  [class^=tit-] & {
+		@include btnIco ($icoPos : icon, $btnSize : get(ico, large), $icoSize : get(ico, default));
+
+		text-align: center;
+	  }
+	}
+  
+	&:not(.small, .large, .xlarge, .xxlarge){
+		@include ico_size;
+	}
+  
+	&.xsmall {
+	  @include ico_size(0.6);
+	}
+
+	&.small {
+	  @include ico_size(0.8);
+	}
+	
+	&.large {
+	  @include ico_size(1.2);
+	}
+
+	&.w_32 {
+		@include ico_size(1.6);
+	}
+  
+	&.xlarge {
+	  @include ico_size(2);
+	}
+  
+	&.w_48 {
+		@include ico_size(2.4);
+	}
+
+	&.xxlarge {
+	  @include ico_size(3);
+	}
+}

@@ -1,0 +1,59 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.list_box{
+	padding-left: get(content-margin, default);
+
+	&:not(:first-child){
+		margin-top: get(content-margin, default);
+	}
+}
+.krds-info-list{
+	> li{
+		color: get(text, default);
+		
+		> .krds-info-list{
+			margin-top: get(margin, small);
+		}
+	}
+	&.decimal{
+		> li{
+			padding-left: calc(get(padding, xlarge) * 2);
+	
+			&::before{
+				@include bgimg('ico_list.svg', $size: contain, $posi: center, $color: transparent);
+				@include WH(get(ico, default));
+				top: rem(3px);
+				left: 0;
+			}
+		}
+	}
+
+	&.hollow{
+		gap: get(content-margin, default);
+	}
+	&.dash{
+		> li{
+			padding-left: get(padding, xxxlarge);
+		}
+	}
+	&.ordered{
+		> li{
+			padding-left: get(content-margin, large);
+		}
+		strong.title{
+			display: inline-block;
+			font-size: get(fontsize, xlarge);
+			margin-top: calc((get(fontsize, xlarge) - get(fontsize, default)) / -2);
+		}
+	}
+	&.none{
+		> li{
+			padding-left: 0;
+		}
+	}
+
+	.tbl-list &{
+		text-align: left;
+		gap: get(margin, xsmall);
+	}
+}

@@ -1,0 +1,208 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.popup_append_wrapper, .pop-wrap{
+  $tit_h : 56px;
+  display: none;
+  @include posi_all(fixed); 
+  z-index: 200;
+  font-size: get(fontsize, default);
+  animation: popup_bg ease-in-out 0.15s forwards;
+
+  @keyframes popup_bg{
+    0%{
+      background-color: transparent;
+    }
+    100%{
+      background-color: rgba(get(background, black), 0.7);
+    }
+  }
+
+  &.active{
+	display: block;
+  }
+  .popup{
+    // @include posi_all(fixed); 
+	background: none;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	right: auto;
+	bottom: auto;
+	box-shadow: 0 6px 24px 6px rgba(get(background, black), 0.4);
+	opacity: 0;
+	width: auto !important;
+	height: auto !important;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 200;
+    
+    .pop_inner{
+      position: relative;
+      background-color: get(background, white);
+      min-width: 300px;
+      //max-width: 1200px;
+      max-width: calc(100vw - 50px);
+  
+      > .title_box{
+        position: relative; 
+        background-color: get(background, main);
+        color: get(text, white); 
+        padding: 0 $tit_h 0 20px;
+        margin: 0;
+        border: 0;
+		overflow: hidden;
+        
+        h2{
+          @include HH($tit_h); font-size: get(title, default);
+        }
+  
+        .pop_close{
+          @include absolute_tr;
+          @include WH($tit_h);
+          //@include ico_close();
+		  display: flex;
+		  align-items: center;
+		  justify-content: center;
+        }
+      }
+  
+      .pop_cont{
+        position: relative;
+  
+        /* .title{
+          display: block; 
+          font-size: $font-size-large;
+  
+          + *{
+            margin-top: 10px;
+          }
+        } */
+  
+        .area-check {
+  
+          .wrap-datapacker {
+            margin-left: 6px;
+          }
+        }
+      
+        .tbl-search {
+      
+          tbody {
+      
+            th, td {
+              line-height: 0;
+            }
+          }
+        } 
+        
+        .list_tabbox {
+          // font-size: 0;
+      
+          &.type3 {
+        
+            .tab-menu {
+              display: inline-block;
+          
+              li {
+                width: auto;
+                height: auto;
+                line-height: normal;
+
+                button {
+                  line-height: normal;
+
+                  &:hover,
+                  &:focus {
+                    background: transparent;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+  
+      > .area-btn{
+        padding: 12px 20px;
+        border-top: 1px solid get(border, default);
+        margin: 0;
+
+        > *{
+          min-width: 80px;
+          height: get(btnsize, default);
+        }
+        &::after{
+          content: none;
+        }
+      }
+      
+      &.alert {
+        width: auto;
+        min-width: 300px;
+        max-width: 90vw;
+      }
+      
+      &.size_small {
+        width: 40vw;
+
+		@media screen and (min-width: 1024.1px) and (max-width: 1500px){
+			width: 60vw;
+		}
+      }
+      &.size_default {
+        width: 50vw;
+
+		@media screen and (min-width: 1024.1px) and (max-width: 1500px){
+			width: 60vw;
+		}
+      }
+      &.size_normal {
+        width: 65vw;
+      }
+  
+      &.size_big {
+        width: 90vw;
+      }
+	  @media screen and (max-width: 1024px){
+		width: 90vw !important;
+	  }
+    }
+
+    .scroll_wrap{
+      max-height: calc(100vh - $tit_h - get(content-margin, xxxlarge));
+      overflow-y: auto; 
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    &.ui-draggable{
+      .pop_inner{
+        > .title_box{
+          cursor: move;
+        }
+      }
+    }
+  }
+}
+
+
+.pop-wrap{
+  z-index: 220;
+
+  body:has(.popup_warning) &{
+    z-index: 1200;
+  }
+}
+
+.popup-wrap{
+	&.krds-modal{
+		&.active{
+			display: block;
+			z-index: 1010;
+			transition-delay: 0s;
+			opacity: 1;
+			visibility: visible;
+		}
+	}
+}

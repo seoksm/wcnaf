@@ -1,0 +1,45 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.krds-in-page-navigation-type .krds-in-page-navigation-area{
+	background-color: get(background, white);
+	//right: calc((100% - $inner_width) / 2 - (16rem - 24px + 4rem));
+	right: calc(50% - ($inner_width / 2) + rem(32px) - rem(8px) - rem(160px) - get(content-margin, default));
+
+	ul{
+		max-height: rem(300px);
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+}
+
+@media (max-width: 1770px) {
+	.krds-in-page-navigation-type{
+		position: relative;
+		padding-right: calc(rem(160px) + get(content-margin, default));
+		
+		.krds-in-page-navigation-area{
+			//right: calc(50% - ($inner_width / 2) + rem(32px) - rem(8px) - rem(160px) - get(content-margin, default) + rem(100px));
+			//right: calc(50% - ($inner_width / 2) + rem(32px) - rem(8px));
+			right: 0;
+			position: sticky;
+			height: 0;
+			float: right;
+			margin-right: calc(rem(-160px) - get(content-margin, default));
+		}
+	}
+}
+@media (max-width: 767px) {
+	.krds-in-page-navigation-type{
+		padding-right: 0;
+
+		.krds-in-page-navigation-area{
+			position: static;
+			float: none;
+			margin-right: 0;
+			height: auto;
+		}
+		.scroll-check{
+			margin-top: get(content-margin, large);
+		}
+	}
+}

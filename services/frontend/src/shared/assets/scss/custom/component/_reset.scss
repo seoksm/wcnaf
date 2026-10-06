@@ -1,0 +1,20 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+html, body{
+	font-family: 'Pretendard GOV';
+}
+
+input, textarea, select{
+	border: 1px solid get(border, default);
+	border-radius: get(radius, xsmall);
+	padding: get(padding, default);
+	max-width: 100%;
+}
+
+input, select{
+	line-height: 1;
+}
+
+table{
+	width: 100%;
+}

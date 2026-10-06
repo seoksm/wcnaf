@@ -1,0 +1,19 @@
+spec:
+  inputs:
+    FORCE_BUILD_ALL_YN: 
+      description: "전체 서비스를 강제로 빌드하시겠습니까?"
+      type: boolean
+      default: false
+---
+include:
+  - project: 'common/pipeline-util'
+    ref: 'main'
+    file: '/template/default-cicd.yaml'
+    inputs:
+      FORCE_BUILD_ALL_YN: $[[ inputs.FORCE_BUILD_ALL_YN ]]
+      # build 시작할 브랜치
+      BUILD_BRANCH: "develop"
+      # Slack 알림 Webhook
+      SLACK_WEBHOOK_URL: $SLACK_WEBHOOK_URL
+      # .docker/config.json. docker hub의 rate limit가 걸릴때 로그인된 config.json의 내용을 넣으면 해결됨
+      DOCKER_CONFIG_JSON: ""    

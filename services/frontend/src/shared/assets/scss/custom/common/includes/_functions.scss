@@ -1,0 +1,17 @@
+//$theme: () !default;
+
+@use 'theme' as *;
+@use 'colors' as *;
+@use 'variables' as *;
+
+
+// 🎨 변수값 가져오기 함수 (안전 처리 포함)
+@function get($category, $key) {
+	$group: map-get($theme, $category);
+	@if type-of($group) == 'map' {
+	  $value: map-get($group, $key);
+	  @return $value;
+	}
+	@warn 'Theme category `#{$category}` is not a map or is missing.';
+	@return null;
+  }

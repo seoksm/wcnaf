@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+images:
+  - name: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/collection
+    newName: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/collection
+    newTag: collection
+  - name: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/system
+    newName: ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/system
+    newTag: system
+
+resources:
+  - ../../base

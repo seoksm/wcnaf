@@ -1,0 +1,26 @@
+generatorName: spring
+additionalProperties:
+    annotationLibrary: swagger1
+    dateLibrary: java8
+    interfaceOnly: true
+    skipDefaultInterface: true
+    requestMappingMode: api_interface
+    documentationProvider: springfox
+    openApiNullable: false
+    hideGenerationTimestamp: true
+globalProperties:
+    apis: ""
+    models: ""
+    supportingFiles: 
+        - none
+typeMappings:
+    UUID: UUID
+    string+OffsetDateTime: OffsetDateTime
+    string+date: OffsetDateTime
+    string+datetime: OffsetDateTime
+    integer+long: Long
+    integer+Long: Long
+    ModelLong: Long
+    CommonFileDto.FileInfoResponse: com.winitech.common.interfaces.inboundAdapter.web.CommonFileDto.FileInfoResponse
+importMappings:
+    ModelLong: java.lang.Long

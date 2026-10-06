@@ -1,0 +1,770 @@
+@use "variables" as *;
+@use "colors" as *;
+@use "functions" as *;
+
+// 요소 숨기기
+@mixin itemHidden {
+	display: block;
+	position: absolute;
+	top: -1px;
+	left: -1px;
+	width: 1px;
+	height: 1px;
+	opacity: .01;
+	text-indent: -99999px;
+	overflow: hidden;
+  }
+  
+  @mixin clearBoth {
+	&::after {
+	  content:"";
+	  display: block;
+	  clear: both;
+	}
+  }
+  
+  // before contents
+  @mixin beforeConts {
+	&::before {
+	  content: '';
+	  display: block;
+	  position: absolute;
+	  @content;
+	}
+  }
+  
+  // after contents
+  @mixin afterConts {
+	&::after {
+	  content: '';
+	  display: block;
+	  position: absolute;
+	}
+  }
+  
+  // both contents
+  @mixin bothConts {
+	&::before,
+	&::after {
+	  content: '';
+	  display: block;
+	  position: absolute;
+	}
+  }
+  
+  // 글씨 ...
+  @mixin txtElp {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	word-break: break-all;
+  }
+  
+  // 기본 요소 쉐도우
+  @mixin defaultShadow {
+	box-shadow: 0 2px 8px 2px rgba(#6979BA, .2);
+  }
+  
+  // 팝업 쉐도우
+  @mixin popShadow {
+	box-shadow: 0 6px 24px rgba($black, .2);
+  }
+  
+  // 아이콘 버튼 //
+  // 좌측 아이콘              icoPos : 'left'
+  // 우측 아이콘              icoPos : 'right'
+  // 글씨랑 같이 가운데 정렬  icoPos : 'center'
+  // 온리 아이콘              icoPos : 'icon' 
+  @mixin btnIco ($icoPos : left, $btnSize : get(btnsize, default), $icoSize : get(ico, default), $type : "") {
+	position: relative;
+  
+	&::before {
+	  content:"";
+	  width: $icoSize;
+	  height: $icoSize;
+	  background-image: url('../img/sp-ico.svg');
+	  background-repeat: no-repeat;
+	  //background-size: 200px auto;
+	  background-size: calc($icoSize * 10) auto;
+	}
+  
+	@if $icoPos == left {
+	  height: $btnSize;
+	  padding-right : calc($btnSize - $icoSize);
+	  padding-left: calc(($btnSize - $icoSize) * 1.4 + $icoSize);
+  
+	  &::before {
+		position: absolute;
+		display: block;
+		top : calc(($btnSize - $icoSize) / 2);
+		left : calc($btnSize - $icoSize);
+	  }
+	}
+  
+	@if $icoPos == right {
+	  height: $btnSize;
+	  padding-right: calc(($btnSize - $icoSize) * 1.4 + $icoSize);
+	  padding-left : calc($btnSize - $icoSize);
+  
+	  &::before {
+		position: absolute;
+		display: block;
+		top : calc(($btnSize - $icoSize) / 2);
+		right : calc($btnSize - $icoSize);
+	  }
+	}
+  
+	@if $icoPos == center {
+	  height: $btnSize;
+  
+	  &::before {
+		position: relative;
+		display: inline-block;
+		vertical-align: middle;
+	  }
+	}
+  
+	@if $icoPos == top {
+	  height: $btnSize;
+	  padding-top: calc(($btnSize - $icoSize) / 2 + $icoSize + get(padding, small));
+	  box-sizing: border-box;
+  
+	  &::before {
+		display: block;
+		position: absolute;
+		top: calc(($btnSize - $icoSize) / 2);
+		left: calc(50% - $icoSize / 2);
+	  }
+	}
+  
+	@if $icoPos == icon {
+	  width: $btnSize;
+	  height: $btnSize;
+	  text-align: left;
+	  text-indent: -99999px;
+	  overflow: hidden;
+  
+	  &::before {
+		position: absolute;
+		display: block;
+		top : calc(($btnSize - $icoSize) / 2);
+		left : calc(($btnSize - $icoSize) / 2);
+	  }
+	}
+  
+	@if $icoPos == none {
+	  width: $btnSize;
+	  height: $btnSize;
+	  overflow: hidden;
+	}
+  }
+  
+  // 버튼 배경컬러에 따라 자동으로 보더컬러, 포커스 컬러 지정해줌
+  @mixin activeColor ($bgColor: false, $borderColor: false, $focusType : false) {
+	outline: 2px solid transparent;
+	transition: outline .15s, background .15s;
+  
+	@if $bgColor {
+	  background-color: $bgColor;
+	  &:hover,
+	  &:focus,
+	  &:active {
+		background-color: darken($bgColor, 5%) !important;
+	  }
+	}
+  
+	@if($bgColor == transparent){
+	  &:hover,
+	  &:focus,
+	  &:active {
+		outline:none !important;
+		background-color: darken(get(gray, light), 5%) !important;
+	  }
+	}
+  
+	@include focusBorder($bgColor, $borderColor);
+  
+	@if $focusType {
+	  &:hover #{$focusType},
+	  &:focus #{$focusType},
+	  &:active #{$focusType} {
+		background-color: darken($bgColor, 10%) !important;
+  
+		@include focusBorder($bgColor, $borderColor, $focusType);
+	  }
+	}
+  }
+  
+  @mixin focusBorder($bgColor:false, $borderColor:false, $focusType: false) {
+	@if $focusType {
+	  &:hover #{$focusType},
+	  &:focus #{$focusType},
+	  &:active #{$focusType} {
+		@include outlineMake(darken($bgColor, .2));
+		border-color: $bgColor;
+		z-index: 1;
+	  }
+	}@else {
+	  @if $borderColor {
+		&:hover,
+		&:focus,
+		&:active {
+		  @include outlineMake(darken($borderColor, .2));
+		  border-color: $borderColor;
+		  z-index: 1;
+		}
+	  } @else {
+		&:hover,
+		&:focus,
+		&:active {
+		  @include outlineMake(darken($bgColor, .3));
+		  border-color: darken($bgColor, .1);
+		  z-index: 1;
+		}
+	  }
+	}
+  }
+  
+  @mixin outlineMake($color) {
+	outline: 2px solid rgba($color, .5);
+  }
+  
+  @mixin ico-etc($size, $filename){
+	display: inline-block;
+	width: $size;
+	height: $size;
+	background: url('../img/#{$filename}.png') no-repeat center center;
+	background-size: auto $size;
+	text-indent: -99999px;
+  }
+
+  @mixin WH($w:100%,$h:$w){
+	width: $w;
+	height: $h;
+  }
+  @mixin HH($h,$line_h:$h){
+	height: $h;
+	line-height: $line_h;
+  }
+  
+  @mixin position(
+	$p: absolute,
+	$t: null,
+	$b: null,
+	$l: null,
+	$r: null
+) {
+	position: $p;
+	top: $t;
+	bottom: $b;
+	left: $l;
+	right: $r;
+}
+  @mixin relative($args...) {
+	@include position(relative, $args...);
+  }
+  @mixin absolute($args...) {
+	@include position(absolute, $args...);
+  }
+  @mixin fixed($args...) {
+	@include position(fixed, $args...);
+  }
+  @mixin absolute_tl($top: 0, $left: $top) {
+	@include absolute($t: $top, $l: $left);
+  }
+  @mixin absolute_tr($top: 0, $right: $top) {
+	@include absolute($t: $top, $r: $right);
+  }
+  @mixin absolute_bl($bottom: 0, $left: $bottom) {
+	@include absolute($b: $bottom, $l: $left);
+  }
+  @mixin absolute_br($bottom: 0, $right: $bottom) {
+	@include absolute($b: $bottom, $r: $right);
+  }
+  @mixin absolute_tlr($top: 0, $left: 0, $right: $left) {
+	@include absolute($t: $top, $l: $left, $r: $right);
+  }
+  @mixin absolute_blr($bottom: 0, $left: 0, $right: $left) {
+	@include absolute($b: $bottom, $l: $left, $r: $right);
+  }
+  @mixin posi_all($p:absolute, $val:0){
+	@include position($p, $val, $val, $val, $val);
+  }
+  @mixin absolute_center($w, $h:$w, $posi: null){
+	position: absolute; @include WH($w, $h);
+  
+	@if($posi == left){
+	  top: 50%; left: 0;
+	  width: $w;
+	  margin-top: calc(-1 * $h / 2);
+	}@else if($posi == right){
+	  top: 50%; right: 0;
+	  margin-top: calc(-1 * $h / 2);
+	}@else if($posi == top){
+	  top: 0; left: 50%;
+	  margin-left: calc(-1 * $w / 2);
+	}@else{
+	  top: 50%; left: 50%;
+	  margin: calc(-1 * $h / 2) 0 0 calc(-1 * $w / 2);
+	}
+  }
+  
+  // @mixin s_overf_h($h) {
+  //   max-height: ($h * 10px) !important;
+  // }
+  
+  @mixin s_overf_h($h) {
+	// max-height: calc(100vh - ($h));
+	max-height: $h;
+  }
+  
+  @mixin s_overf_w($w) {
+	table {
+	  min-width: $w !important;
+	}
+  }
+  
+  @mixin font_weight($val:bold){
+	//font-weight: $val;
+  
+	@if $val == 100 or $val == Thin or $val == thin{
+	  font-weight: 100;
+	}@else if $val == 200 or $val == ExtraLight or $val == extraLight or $val == extralight{
+	  font-weight: 200;
+	}@else if $val == 300 or $val == Light or $val == light{
+	  font-weight: 300;
+	}@else if $val == 400 or $val == Regular or $val == regular{
+	  font-weight: 400;
+	}@else if $val == 500 or $val == Medium or $val == normal{
+	  font-weight: 500;
+	}@else if $val == 600 or $val == SemiBold or $val == semiBold or $val == semibold or $val == semi{
+	  font-weight: 600;
+	}@else if $val == 700 or $val == Bold or $val == bold{
+	  font-weight: 700;
+	}@else if $val == 800 or $val == ExtraBold or $val == extraBold or $val == extrabold{
+	  font-weight: 800;
+	}@else if $val == 900 or $val == Black{
+	  font-weight: 900;
+	}
+  }
+  
+  @mixin transition($val:0.15){
+	transition: $val+s;
+  }
+  
+  @mixin ico_close($w: 30px, $h: 2px, $color: #000){
+	&::before, &::after{
+	  content: ''; @include absolute_center($w, $h); 
+	  background-color: $color; border-radius: 50px;
+	}
+	&::before{
+	  transform: rotate(-45deg);
+	}
+	&::after{
+	  transform: rotate(45deg);
+	}
+	&:hover{
+	  @include transition(0.5);
+	  transform: rotate(180deg);
+	}
+  }
+  
+  @mixin text_ellipsis($line:1){
+	overflow: hidden !important; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
+  
+	@if $line != 1{
+	  display: -webkit-box;
+	  -webkit-box-orient: vertical;
+	  white-space: normal;
+	  -webkit-line-clamp: $line;
+	}
+  }
+  
+  /* @mixin flex($val){
+	display: flex;
+  
+	@if $val == center{
+	  justify-content: center;
+	  align-items: center;
+	}@else{
+	  @if $val == col{
+		$val : column;
+	  }
+	  flex-direction: $val;
+	}
+  } */
+  
+  h1, h2, h3,
+  h4, h5, h6 {
+	  @extend %h_tags !optional;
+  }
+  
+  @mixin tbl-card-list{
+	table {
+  
+	  colgroup,
+	  thead {
+		display: none;
+	  }
+  
+	  tbody {
+  
+		tr {
+		  display: block;
+		  //padding: 14px;
+		  border-bottom: 1px solid get(border, default);
+  
+		  th{
+			display: block;
+			text-align: left;
+
+			.txt-req{
+				margin-left: calc(get(margin, small) * -1);
+			}
+		  }
+		  td  {
+			position: relative;
+			display: block;
+			padding: get(padding, xsmall);
+			border: 0;
+			text-align: left !important;
+			white-space: normal;
+			border-bottom: 1px solid get(gray, ccc);
+  
+			&:last-child {
+			  border-bottom: none !important;
+			}
+  
+			&[aria-label]::before{
+			  content:attr(aria-label);
+			  position: relative;
+			  display: block;
+			  //width:8rem;
+			  padding: get(padding, default);
+			  color:get(text, darken);
+			  @include font_weight(SemiBold);
+			  text-align:left;
+			  box-sizing: border-box;
+			  margin: calc(get(padding, xsmall) * -1) calc(get(padding, xsmall) * -1) get(margin, default);
+			  background-color: get(table, th);
+			}
+		  }
+		  th, td{
+			&:not(:first-child){
+				border-left: 0;
+			}
+		  }
+  
+		  &.selected:not([onclick]) {
+  
+			background: get(background, sub1);
+			
+			td[aria-label]{
+			  background: none;
+			  border-bottom: 1px solid #3d6388;
+  
+			  &::before{
+				//color: $co-txt-white;
+			  }
+			}
+		  }
+  
+		  &:hover {
+			background: get(background, hover) !important;
+  
+			th, td{
+			  background: get(background, hover) !important;
+			}
+		  }
+  
+		  .wrap-input{
+			input, select, textarea{
+				&:not(:has(+ .btn-comm)){
+					width: 100%;
+				}
+			}
+		  }
+		  &.row_add {
+			.wrap-input{
+			  display: inline-block;
+			  width: calc(100% - 9rem);
+			}
+		  }
+		}
+	  }
+	}
+	&.modify{
+	  tbody{
+		tr{
+		  padding: 0;
+  
+		  td{
+			padding: 0 0 calc(get(padding, small) + 2px);
+  
+			&[aria-label]{
+			  &::before{
+				background: get(table, th);
+				padding: get(padding, small) get(padding, small);
+				margin-bottom: get(margin, small);
+				border: solid get(table, border);
+				border-width: 1px 0;
+				font-size: get(fontsize, large);
+			  }
+			  .wrap-input{
+				margin: 4px 0;
+			  }
+			}
+		  }
+		  &:first-of-type{
+			td{
+			  &:first-of-type{
+				&[aria-label]{
+				  &::before{
+					border-top: 0;
+				  }
+				}
+			  }
+			}
+		  }
+		  &:hover{
+			background: none !important;
+  
+			th, td{
+			  background: none !important;
+			}
+		  }
+		}
+	  }
+	}
+  }
+  
+  @mixin tbl-card-edit{
+	table {
+	  min-width: auto;
+  
+	  thead {
+		display: none;
+	  }
+	  
+	  col {
+		display: block;
+		width: 100% !important;
+	  }
+  
+	  tr {
+		> td{
+		  height: auto;
+  
+		  &:not(:first-child){
+			border-left: none;
+		  }
+		}
+	  }
+  
+	  th, 
+	  td {
+		display: block;
+		width: 100%;
+		height: auto;
+		padding: 8px;
+		border-width: 1px 0px 0px 0px;
+		box-sizing: border-box;
+  
+		&:last-child {
+		  border-width: 1px 0px 1px 0px;
+		}
+	  }
+	  th{
+		text-align: left;
+	  }
+  
+	  .wrap-input {
+  
+		&.w- {
+		  &20p,
+		  &30p,
+		  &40p,
+		  &50p,
+		  &60p {
+			width: 100% !important;
+  
+			.datapicker {
+  
+			  &:only-child {
+				width: 100%;
+			  }
+			}
+		  }
+		}
+  
+		&.m_fd_col {
+		  flex-direction: column;
+		}
+  
+		& + .area-btn {
+		  margin-top: 6px;
+		}
+  
+		&.tel {
+  
+		  select,
+		  input {
+			
+			&:first-child {
+			  width: 80px;
+			}
+		  }
+		}
+	  }
+	}
+  }
+  
+  
+/* **** scroll ****/
+@mixin scrollbar {
+	&::-webkit-scrollbar {
+		width: 1.4rem;
+	}
+	&::-webkit-scrollbar-thumb {
+		border-radius: 1.2rem; 
+		background-color: #bbb;
+		border: .35rem solid transparent;
+		background-clip: content-box;
+	}
+	&::-webkit-scrollbar-track {
+		// background-color: var(--#{$prefix}gray-30);
+	}
+}
+
+@mixin flex($ds: flex, $ai: center, $jc: center){
+	display: $ds;
+
+	@if $ds == flex{
+		align-items: $ai;
+		justify-content: $jc;
+	}
+}
+
+@mixin flex_area{
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+}
+
+@mixin flex_col{
+	display: flex;
+	flex-direction: column;
+}
+
+@mixin flex_row{
+	display: flex;
+	flex-direction: row;
+}
+
+@mixin background(
+	$img: null,
+	$size: null,
+	$repeat: null,
+	$posi: null,
+	$x: $posi,
+	$y: $posi,
+	$color: null,
+) {
+	background-color: $color;
+	background-image: url($img_path+$img);
+	background-repeat: $repeat;
+	background-position: $x $y;
+	background-size: $size;
+}
+@mixin bgimg($file, $size: null, $repeat: null, $posi: null, $x: null, $y: null, $color: null) {
+	// $repeat가 null일 경우 기본값 설정
+	@if $repeat == null {
+	  $repeat: no-repeat;
+	}
+  
+	// $x 또는 $y가 따로 지정되지 않으면 $posi 값으로 대체
+	@if $x == null {
+	  $x: $posi;
+	}
+	@if $y == null {
+	  $y: $posi;
+	}
+  
+	@include background(
+	  $img: $file,
+	  $size: $size,
+	  $repeat: $repeat,
+	  $x: $x,
+	  $y: $y,
+	  $color: $color
+	);
+}
+
+// 아이콘 백그라운드 포지션 좌표설정 (0,0)이 기준
+@mixin icoMatrix ($leftPos : 0, $topPos : 0, $icoSize: get(ico, default)) {
+	background-position: calc($icoSize * -1 * $leftPos) calc($icoSize * -1 * $topPos);
+}
+
+%sec-tit-base {
+	position: relative;
+	@include font_weight;
+}
+
+@mixin sec-tit-style($tag) {
+	#{$tag}.sec-tit {
+		@extend %sec-tit-base;
+
+		&:not(:first-child){
+			margin-top: get(content-margin, large);
+		}
+	
+		.small{
+			font-size: get(fontsize, xlarge);
+			margin-left: get(margin, small);
+		}
+	
+		// 커스텀 스타일 삽입
+		@content;
+	}
+}
+
+@mixin ico_color($val : white){
+	@if($val == main){
+		filter: brightness(0) saturate(100%) invert(30%) sepia(95%) saturate(975%) hue-rotate(192deg) brightness(95%) contrast(87%); //#2D69C2
+	}@else if($val == sub){
+		filter: brightness(0) saturate(100%) invert(18%) sepia(47%) saturate(2654%) hue-rotate(200deg) brightness(97%) contrast(98%); //#0F4086 | #0F4188
+	}@else if($val == gray){
+	  filter: brightness(0) saturate(100%) invert(35%) sepia(32%) saturate(0%) hue-rotate(157deg) brightness(102%) contrast(84%); //#666
+	}@else if($val == light-gray){
+	  filter: brightness(0) saturate(100%) invert(71%) sepia(97%) saturate(0%) hue-rotate(173deg) brightness(91%) contrast(83%); //#bbb
+	}@else if($val == dark){
+	  filter: brightness(0) saturate(100%) invert(18%) sepia(0%) saturate(0%) hue-rotate(285deg) brightness(93%) contrast(90%);
+	}@else if($val == white){
+	  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(621%) hue-rotate(29deg) brightness(118%) contrast(108%);
+	}@else if($val == del){
+	  filter: brightness(0) saturate(100%) invert(10%) sepia(85%) saturate(4374%) hue-rotate(355deg) brightness(89%) contrast(99%); // #A40C0C
+	}
+}
+
+  // after contents
+@mixin afterConts {
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+
+    @content;
+  }
+}
+
+// both contents
+@mixin bothConts {
+  &::before,
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+
+    @content;
+  }
+}

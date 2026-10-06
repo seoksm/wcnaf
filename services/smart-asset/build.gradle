@@ -1,0 +1,203 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.8'
+    id 'io.spring.dependency-management' version '1.1.3'
+    id 'com.google.cloud.tools.jib' version '2.8.0'
+    id 'org.openapi.generator' version "6.6.0"
+    id 'java'
+}
+
+group = 'com.winitech'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+// 서비스명
+var serviceName = 'smart-asset'
+var egovframeVersion = '4.3.0'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.egovframe.go.kr/maven/' }
+    maven { url uri("${rootProject.projectDir}/../_maven-repo_") }
+}
+
+ext {
+    set('springCloudVersion', "2020.0.2")
+}
+
+configurations.all {
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+    exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+    exclude group: 'org.slf4j', module: 'log4j-over-slf4j'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+
+    // Apache POI 5.2+는 ooxml(XSSFWorkbook 등) 로깅에 log4j2 API를 필수로 요구하는데,
+    // 이 프로젝트는 log4j2 계열을 전부 제외하는 정책이라 5.2+를 쓰면 POIXMLDocumentPart 정적
+    // 초기화에서 ClassNotFoundException이 난다. jxls-poi(S-213 엑셀 업서트)가 끌어오는 POI를
+    // log4j2 없이 동작하는 마지막 라인인 5.1.0으로 고정한다.
+    resolutionStrategy {
+        force 'org.apache.poi:poi:4.1.2'
+        force 'org.apache.poi:poi-ooxml:4.1.2'
+        force 'org.apache.poi:poi-ooxml-schemas:4.1.2'
+    }
+}
+
+dependencies {
+    // eGovFrame
+    implementation "org.egovframe.rte:org.egovframe.rte.ptl.mvc:${egovframeVersion}"
+    implementation "org.egovframe.rte:org.egovframe.rte.fdl.cmmn:${egovframeVersion}"
+    implementation "org.egovframe.rte:org.egovframe.rte.psl.dataaccess:${egovframeVersion}"
+    implementation "org.egovframe.rte:org.egovframe.rte.fdl.logging:${egovframeVersion}"
+
+    // Spring boot    
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    
+    // MapStruct
+    implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+    annotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final"
+    annotationProcessor(
+            'org.projectlombok:lombok',
+            'org.projectlombok:lombok-mapstruct-binding:0.1.0'
+    )
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'com.google.guava:guava:28.2-jre'
+    implementation 'com.mashape.unirest:unirest-java:1.4.9'
+    
+    // DB 설정
+    runtimeOnly 'org.postgresql:postgresql:42.2.23'
+    testRuntimeOnly 'com.h2database:h2'
+
+    // Flyway 설정
+    implementation 'org.flywaydb:flyway-core:7.15.0'
+    
+    // Log 설정
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
+    implementation 'org.slf4j:log4j-over-slf4j:1.7.13'
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    implementation 'org.springframework.boot:spring-boot-starter-integration'
+    implementation 'org.springframework.integration:spring-integration-ip'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    
+    // MQTT
+    implementation 'org.springframework.integration:spring-integration-mqtt'
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
+    
+    // MyBatis 설정 중 winitech.mybatis.use-auto-mapper-refresh = true로 사용시 오류를 야기하므로 주석처리 함
+    // developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    
+    // QueryDsl
+    implementation 'com.querydsl:querydsl-jpa:4.4.0'
+    annotationProcessor("com.querydsl:querydsl-apt:4.4.0:jpa")
+
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    annotationProcessor('javax.annotation:javax.annotation-api:1.3.2')
+    
+    // common 프로젝트 직접 참조 (기존 JAR 방식에서 변경)
+    implementation project(':common')
+    // common의 WiniExcel(엑셀 다운로드)이 쓰는 jxls-poi는 common 내부에서 implementation으로 선언되어
+    // 여기까지 전이되지 않는다. S-213 엑셀 업서트에서 Apache POI로 업로드 파일을 직접 파싱하기 위해
+    // common과 동일 버전을 다시 선언 (버전 불일치로 인한 POI 클래스 충돌 방지)
+    implementation 'org.jxls:jxls-poi:2.14.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation' // NotE
+    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0' // Boot 2.6 지원 안함
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'org.mindrot:jbcrypt:0.4'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+    // application.properties의 spring.profiles.active=${ACTIVE:local}에 얹혀, 테스트 실행 시에는
+    // "local" 프로필(로컬 DB 접속 등 기존 설정) 위에 "test" 프로필(src/test/resources/application-test.properties)을
+    // 추가로 활성화한다 - @SpringBootTest가 필요로 하는 값(예: 엑셀 서명 키) 중 운영 설정 파일에는 더 이상
+    // 없는 것들을, 커밋해도 안전한 테스트 전용 값으로 여기서 채운다.
+    environment "ACTIVE", "local,test"
+}
+
+// 케밥케이스의 서비스명을 카멜케이스로 변경
+var servicePackageName = serviceName.replaceAll("\\-+[^-]") { it.substring(1, 2).toUpperCase() + it.substring(2) }
+
+['openApiGenerate', 'openApiGenerators', 'openApiMeta', 'openApiValidate'].each { taskName ->
+    tasks.named(taskName) {
+        group = null
+        description = null
+    }
+}
+
+// *apiSpec.yaml 파일 기반 controller 생성
+def openApiGeneratorTasks = []
+
+new File("$rootDir/src/main/resources/".toString()).eachFileRecurse(groovy.io.FileType.FILES) { file ->
+    if (! file.getName().endsWith("apiSpec.yaml")) {
+        return
+    }
+
+    def fileName = file.getName()
+    def apiName = fileName.replace("_apiSpec.yaml", "").replace("apiSpec.yaml", "")
+
+    def task = tasks.create("openApiGenerate_" + apiName, org.openapitools.generator.gradle.plugin.tasks.GenerateTask.class, {
+        group = "openapi tools"
+        configFile = "$projectDir/../../extras/openApi/config/spring.yaml"
+        inputSpec = "$projectDir/src/main/resources/$fileName"
+        outputDir = "$projectDir"
+        apiPackage = "com.winitech.${servicePackageName}.interfaces.inboundAdapter.spec"
+        modelPackage = "com.winitech.${servicePackageName}.interfaces.inboundAdapter.spec"
+        templateDir = "$projectDir/../../extras/openApi/templates/spring"
+        additionalProperties = [
+                serviceName: serviceName,
+                useTags    : "true",
+        ]
+    })
+
+    openApiGeneratorTasks.add(task)
+}
+
+tasks.register("generateAllOpenApiSpecs") {
+    doLast {
+        println("██╗    ██╗██╗███╗   ██╗██╗████████╗███████╗ ██████╗██╗  ██╗")
+        println("██║    ██║██║████╗  ██║██║╚══██╔══╝██╔════╝██╔════╝██║  ██║")
+        println("██║ █╗ ██║██║██╔██╗ ██║██║   ██║   █████╗  ██║     ███████║")
+        println("██║███╗██║██║██║╚██╗██║██║   ██║   ██╔══╝  ██║     ██╔══██║")
+        println("╚███╔███╔╝██║██║ ╚████║██║   ██║   ███████╗╚██████╗██║  ██║")
+        println("╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚══════╝ ╚═════╝╚═╝  ╚═╝")
+        println("\n" + "=".repeat(80))
+        println("🚨  알림 🚨")
+        println("👉  *apiSpec.yaml 파일이 추가되거나 삭제될 경우 gradle을 sync 해주셔야 합니다. 👈")
+        println("=".repeat(80) + "\n")
+    }
+
+    dependsOn openApiGeneratorTasks
+}
+tasks.named("generateAllOpenApiSpecs") {
+    group = "openapi tools"
+}
+
+
+apply from: "${project(':common').projectDir}/kafka-codegen.gradle"

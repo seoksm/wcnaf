@@ -1,0 +1,469 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-frontend
+  name: service-frontend
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: service-frontend
+  template:
+    metadata:
+      labels:
+        app: service-frontend
+    spec:
+      imagePullSecrets:
+      - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/frontend:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_frontend:1eb88a523b95462309d6136614dc56c8ca3b1910
+        name: service-frontend
+        resources:
+          requests:
+            cpu: "5m"
+            memory: "50Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        # image: devlos0322/mal-aqua-sentinel-sys-fe:v24052401
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ACTIVE
+          value: "prod"
+---
+# System Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-system
+  name: service-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-system
+  template:
+    metadata:
+      labels:
+        app: service-system
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_system:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-system
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties          
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod
+---
+# System Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-code-qna
+  name: service-code-qna
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-code-qna
+  template:
+    metadata:
+      labels:
+        app: service-code-qna
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_code-qna:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-code-qna
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties          
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod-code-qna
+
+---
+# System Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-docs
+  name: service-docs
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-docs
+  template:
+    metadata:
+      labels:
+        app: service-docs
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_docs:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-docs
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties          
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod-docs
+
+---
+# Comment Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-comment
+  name: service-comment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-comment
+  template:
+    metadata:
+      labels:
+        app: service-comment
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_comment:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-comment
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties          
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod-comment
+
+---
+# Code-play Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-code-play
+  name: service-code-play
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-code-play
+  template:
+    metadata:
+      labels:
+        app: service-code-play
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_code-play:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-code-play
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties          
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod-code-play
+          
+---
+# Tech-blog Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-tech-blog
+  name: service-tech-blog
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-tech-blog
+  template:
+    metadata:
+      labels:
+        app: service-tech-blog
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_tech-blog:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-tech-blog
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties          
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod-tech-blog
+
+---
+# Project Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-project
+  name: service-project
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-project
+  template:
+    metadata:
+      labels:
+        app: service-project
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      # - image: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system:1eb88a523b95462309d6136614dc56c8ca3b1910
+      - image: registry.cloud-winitech.com/win-dev-portal_project:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-project
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties          
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod-project
+          

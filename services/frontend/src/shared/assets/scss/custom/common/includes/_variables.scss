@@ -1,0 +1,119 @@
+// 🎯 value.$theme 기본 선언
+@use "theme" as value;
+
+$url: ".." !default; //url path
+$img_path: $url+"/img/" !default; //img path
+
+// 🎯 SCSS 변수값 결과 테이블
+// +-------------------+------------+------------+------------+------------+------------+----
+// | Category        | xsmall  | small   | default | large   | xlarge  | xxlarge | xxxlarge|
+// +===================+============+============+============+============+============+====
+// | fontsize        | 12px    | 14px    | 16px    | 18px     | 20px    | 22px    | 24px    |
+// | title           | 24px    | 26px    | 28px    | 30px    | 32px    | 34px    | 36px    |
+// | margin          | 4px     | 6px     | 8px     | 10px    | 12px    | 14px    | 16px    |
+// | padding         | 4px     | 6px     | 8px     | 10px    | 12px    | 14px    | 16px    |
+// | content-margin  | 0px     | 8px     | 16px    | 24px    | 32px    | 40px    | 48px    |
+// | radius          | 4px     | 6px     | 8px     | 10px    | 12px    | 14px    | 16px    |
+// | btnsize         | 28px    | 30px    | 32px    | 34px    | 36px    | 38px    | 40px    |
+// | ico             | 16px    | 18px    | 20px    | 22px    | 24px    | 26px    | 28px    |
+// | form            | 28px    | 30px    | 32px    | 34px    | 36px    | 38px    | 40px    |
+// +-------------------+------------+------------+------------+------------+------------+----
+
+$base-font-size: 16px;
+$inner_width : 1440px;
+
+@function scale-size($base-size, $multiplier, $category) {
+	$step-multiplier: if($category == content-margin, 4, 1);
+
+    @return if($base-size, calc($base-size + (rem(2px) * ($multiplier * $step-multiplier))), null);
+}
+
+// 🎯 유틸리티 함수: 맵을 생성하는 함수 (함수 참조 사용)
+@function map-from-keys($keys, $func-name, $value, $category) {
+    $result: ();
+    @each $name, $multiplier in $keys {
+        $computed-value: call(get-function($func-name), $value, $multiplier, $category);
+        $result: map-merge($result, ($name: $computed-value));
+    }
+    @return $result;
+}
+
+@function rem($px-value) {
+  @return calc($px-value / $base-font-size) * 1rem;
+}
+
+// 🎯 1단계: 기본값 정의
+value.$theme: map-merge(
+    value.$theme, (
+        default: (
+            gap: rem(8px),             // 기본 간격
+            radius: rem(8px),          // 기본 테두리 반경
+            font: rem(16px),      // 기본 폰트 크기
+            title: rem(28px),     // 기본 제목 크기
+            item: rem(32px),      // 기본 항목 크기
+            ico: rem(20px),       // 기본 아이콘 크기
+            content-margin: rem(16px),  // 기본 콘텐츠 마진
+            form: rem(32px),  // 입력폼 마진
+        )
+    )
+);
+
+$size-steps: (
+    xsmall: -2,
+    small: -1,
+    large: 1,
+    xlarge: 2,
+    xxlarge: 3,
+    xxxlarge: 4
+);
+
+$categories: (
+    fontsize: font,
+    title: title,
+    margin: gap,
+    padding: gap,
+    content-margin: content-margin,
+    radius: radius,
+    btnsize: item,
+    ico: ico,
+	form: form,
+);
+
+@each $category, $base-key in $categories {
+    $base-value: map-get(value.$theme, default, $base-key);
+    
+    @if $base-value {
+
+        value.$theme: map-merge(
+            value.$theme, (
+                #{$category}: map-merge(
+                    (default: $base-value),
+                    map-from-keys($size-steps, "scale-size", $base-value, $category)
+                )
+            )
+        );
+    }
+}
+
+
+// 변수값 확인용
+// // JSON 스타일 출력 함수
+// @function to-json-pair($size, $rem-value) {
+// 	@return "\"#{$size}\": { \"px\": \"#{$rem-value}\"}";
+// }
+
+// // 전체 map 디버그 출력
+// @each $category, $value in $theme {
+// 	@if type-of($value) == 'map' {
+// 		$lines: ();
+// 		@each $size, $val in $value {
+// 			$line: to-json-pair($size, $val);
+// 			$lines: append($lines, $line, comma);
+// 		}
+
+// 		@debug "\"#{$category}\": { #{join($lines, ', ')} }";
+// 	} @else {
+// 		// default 맵이거나 단일 값 처리
+// 		@debug "\"#{$category}\": \"#{$value}\"";
+// 	}
+// }

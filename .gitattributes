@@ -1,0 +1,9 @@
+# Gradle Wrapper Scripts for Linux/MacOS/Docker
+**/gradlew text eol=lf
+
+# Shell Scripts
+**/*.sh text eol=lf
+
+# Windows Scripts
+**/*.bat text eol=crlf
+**/*.cmd text eol=crlf

@@ -1,0 +1,25 @@
+@config "../tailwind.config.js";
+
+@layer theme, base, mui, components, utilities;
+
+@import './colors.css';
+@import './sizes.css';
+
+@layer base {
+  html {
+    font-size: 62.5%;
+  }
+}
+
+@import 'tailwindcss';
+
+/*
+ * QR 라벨 등 "인쇄 전용" 콘텐츠는 #qr-print-root(문서 body 최상위, #root 바깥)에
+ * 포탈로 렌더링된다. 인쇄 시 사이드바·헤더 등 앱 전체(#root)를 숨기고 그 포탈만 보이게 한다.
+ * 개별 페이지에 print:hidden을 흩뿌리는 대신 이 한 곳에서 전역으로 제어한다.
+ */
+@media print {
+  #root {
+    display: none !important;
+  }
+}

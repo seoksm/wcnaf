@@ -1,0 +1,61 @@
+# Api-Gateway Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: service-api-gateway
+  name: service-api-gateway
+spec:
+  replicas: 3
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: service-api-gateway
+  serviceName: "service-api-gateway" 
+  template:
+    metadata:
+      labels:
+        app: service-api-gateway
+    spec:
+      imagePullSecrets:
+        - name: ecr-credentials
+      containers:
+      - image: registry.cloud-winitech.com/win-dev-portal_api-gateway:1eb88a523b95462309d6136614dc56c8ca3b1910
+        ports:
+        - containerPort: 8092  # WAS port
+        - containerPort: 18092  # TCP port
+        env:
+        - name: ACTIVE
+          value: "prod"
+        name: service-api-gateway
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "300Mi"
+          limits:
+            cpu: "700m"
+            memory: "700Mi"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /actuator/health
+            port: 8092
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /app/resources/application-prod.properties
+          name: secret-volume
+          readOnly: true
+          subPath: application-prod.properties
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: application-prod-api-gateway
+

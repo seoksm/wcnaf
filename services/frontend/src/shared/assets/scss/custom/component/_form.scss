@@ -1,0 +1,268 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.wrap-input {
+    display: flex;
+    align-items: center;
+    gap: get(margin, small);
+	flex-wrap: wrap;
+	max-width: 100%;
+	min-width: 0;
+
+	&.full{
+		width: 100%;
+	}
+	*:not([class*=wini]){
+		label {
+			// flex-shrink: 0;
+			// width: 120px;
+			// color: get(text, main);
+			// @include font_weight(bold);
+		}
+	}
+
+	+ .wrap-input{
+		margin-top: get(content-margin, large);
+	}
+    &.ds-fl {
+        &.ju-c-center {
+            justify-content: center;
+        }
+    }
+
+    &.mail {
+
+        @include tabletLess {
+
+            select,
+            input {
+                width: calc((100% - 28px) / 3);
+                margin-left: 0;
+            }
+        }
+    }
+
+    &.tel {
+
+        @include tabletLess {
+        
+            select,
+            input {
+                width: 70px;
+                margin-left: 0;
+            }
+        }
+
+    }
+
+	select{
+		padding-right: rem(40px);
+		@include bgimg('ico_select.svg', $size: get(ico, default), $x: right rem(10px), $y: center);
+
+		&:disabled{
+			@include bgimg('ico_select_disabled.svg', $color: get(background, disabled));
+		}
+	}
+
+	textarea{
+		width: 100%;
+	}
+
+	input{
+		&:read-only{
+			// background-color: get(background, disabled);
+		}
+		&:disabled{
+			// background-color: get(background, disabled);
+			// color: get(text, disabled);
+		}
+	}
+	.tit{
+		@include font_weight;
+		color: get(text, main);
+	}
+}
+
+.flex-input{
+	display: flex;
+	flex-wrap: wrap;
+	gap: get(margin, small) get(margin, xxlarge);
+
+	.wrap-input{
+		flex: 1;
+		//flex-wrap: nowrap;
+		min-width: 120px;
+
+		label{
+			white-space: nowrap;
+		}
+		input[type="text"],
+		input[type="tel"],
+		input[type="password"],
+		input[type="file"],
+		input[type="number"],
+		input[type="email"],
+		input[type="date"],
+		input[type="search"],
+		textarea,
+		select{
+			min-width: 70px;
+			width: 100%;
+		}
+	}
+}
+
+.tit_board {
+    display: flex;
+
+    th & {
+        position: relative;
+        padding: 5px 0;
+    }
+}
+
+.req_guide{
+	display: block;
+	color: get(text, point);
+	text-align: right;
+	margin-bottom: get(margin, xsmall);
+}
+.txt-req {
+    position: relative;
+    width: 12px;
+	//margin-left: -12px;
+	display: inline-block;
+	text-indent: -99999px;
+	text-align: left;
+
+    &::before {
+        content: '*';
+        position: absolute;
+        top: 0;
+		left: 0;
+        color: get(text, warn);
+		text-indent: 0;
+		text-align: center;
+		line-height: 1;
+    }
+
+    +label {
+        width: calc(120px - 12px);
+        // padding-left: 10px;
+    }
+}
+
+.check-area{
+	display: flex;
+	gap: get(margin, default) calc(get(margin, large) * 2);
+	flex-wrap: wrap;
+
+	&.center{
+		justify-content: center;
+	}
+	.label-check{
+		position: relative;
+
+		&.check_all{
+			input{
+				~ label{
+					flex-direction: column-reverse;
+					align-items: center;
+					justify-content: center;
+					gap: 0 !important;
+				}
+			}
+		}
+		input{
+			&[type=checkbox],
+			&[type=radio]{
+				@include itemHidden;
+
+				~ label{
+					position: relative;
+					display: inline-flex;
+					gap: get(margin, default);
+					font-size: get(fontsize, default);
+
+					&::before, &::after{
+						display: flex;
+						content: '';
+						@include transition;
+					}
+					&::before{
+						flex-shrink: 0;
+						@include WH(get(ico, default));
+						margin-top: get(margin, xsmall);
+						z-index: 3;
+						background-color: get(background, white);
+						border: rem(1px) solid get(border, dark);
+					}
+					&::after{
+						position: absolute;
+						z-index: 4;
+						top: get(margin, xsmall);
+						left: 0;
+					}
+				}
+				&:disabled{
+					~ label{
+						color: get(text, disabled);
+					}
+				}
+			}
+			&[type=checkbox]{
+				~ label{
+					&::before{
+						border-radius: get(radius, xsmall);
+					}
+					&::after{
+						@include WH(get(ico, default));
+						@include bgimg('sp-ico.svg', $size: 20rem auto);
+						filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(621%) hue-rotate(29deg) brightness(118%) contrast(108%);
+						@include icoMatrix(6, 0);
+						opacity: 0;
+					}
+				}
+				&:checked{
+					~ label{
+						&::before{
+							border-color: get(border, main);
+							background-color: get(background, main);
+						}
+						&::after{
+							opacity: 1;
+						}
+					}
+				}
+			}
+			&[type=radio]{
+				~ label{
+					&::before{
+						border-radius: 50%;
+					}
+					&::after{
+						@include WH(rem(12px));
+						border-radius: 50%;
+						opacity: 0;
+						top: calc(((get(ico, default) - rem(12px)) / 2) + get(margin, xsmall));
+						left: calc((get(ico, default) - rem(12px)) / 2);
+					}
+				}
+				&:checked{
+					~ label{
+						&::before{
+							border-color: get(border, main);
+						}
+						&::after{
+							background-color: get(background, main);
+							opacity: 1;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+.label-select{
+	max-width: 100%;
+}

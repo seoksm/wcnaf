@@ -1,0 +1,244 @@
+networks:
+  net_wcnf:
+    driver: bridge
+
+services:
+  ############# NATS(MQTT) #############
+  nats:
+    image: nats:2.12.7-alpine3.22
+    container_name: wcnf-nats
+    ports:
+      - "21883"    # MQTT Port
+      - "28188"    # WS PORT
+      # - "4222:4222"    # Client Port
+      # - "4244:4244"    # Cluster Port (노드 간 통신)
+      # - "28222:8222"    # Monitoring Port (필요 시)
+    volumes:
+      - ./nats.conf:/etc/nats/nats.conf
+    # 실행 시 호스트의 이름을 서버 이름으로 사용하거나 직접 지정 가능합니다.
+    command: [ "-c", "/etc/nats/nats.conf" ]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - net_wcnf
+    restart: always
+
+  ############# zookeeper #############
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.9
+    container_name: wcnf-zookeeper
+    user: root
+    # ports:
+      # - "2181"      # 클라이언트 연결을 감지하는 포트
+      # - "2888"      # 클러스터간 동기화를 위한 포트
+      # - "3888"      # Leader를 선출하기 위한 포트
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: wcnf-zookeeper:2888:3888
+    volumes:
+      - ./logs/log-wcnf-zookeeper:/var/log/kafka
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "4"
+        max-size: "10m"
+    networks:
+      - net_wcnf
+    restart: always
+
+  ############# kafka #############
+  kafka:
+    image: confluentinc/cp-kafka:7.5.9
+    container_name: wcnf-kafka
+    user: root
+    hostname: wcnf-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      # - 29092:29092
+      # - 9991:9991
+    #mem_limit: "2g"
+    environment:
+      KAFKA_BROKER_ID: 1  # 브로커 아이디 지정
+      KAFKA_ZOOKEEPER_CONNECT:  wcnf-zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://wcnf-kafka:29092,PLAINTEXT_HOST://${SERVER_URI}:9092 # 두 포트를 다르게 설정
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"  # 토픽 자동 생성 해제(운영 환경)
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"  # 토픽 자동 생성 (개발 환경)
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9991
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_HEAP_OPTS: '-Xmx512M -Xms512M'  # Page cache 용 메모리 할당
+    volumes:
+      - ./logs/log-wcnf-kafka:/var/log/kafka
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "4"
+        max-size: "10m"
+    networks:
+      - net_wcnf
+    restart: always
+
+  ############# kafka UI #############
+  kafka-ui:
+    image: kafbat/kafka-ui:v1.5.0
+    container_name: wcnf-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "29093:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    networks:
+      - net_wcnf
+    restart: always
+
+  ############# database #############
+  postgres:
+    image: postgres:17.5
+    container_name: wcnf-postgres
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - net_wcnf
+    restart: always
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./etc/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  ############# API-Gateway #############
+  api-gateway:
+    build:
+      context: ../services/
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "28099:8092"
+    environment:
+      ACTIVE: "docker"
+      # 아래 세 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
+      # 없거나 너무 짧으면 컨테이너가 기동에 실패한다. services/common/src/main/resources/default-application.properties 참고.
+      WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
+      WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
+      WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+    volumes:
+      - ../services/common/src:/common/src
+      - ../services/common/build.gradle:/common/build.gradle
+      - ../services/api-gateway/src:/app/src
+      - ../services/api-gateway/build.gradle:/app/build.gradle
+      - ../services/api-gateway/gradle:/app/gradle
+      - ../services/api-gateway/gradlew:/app/gradlew
+      - ../services/api-gateway/settings.gradle:/app/settings.gradle
+      - ../services/api-gateway/docker-gradle-cache:/root/.gradle
+    networks:
+      - net_wcnf
+    restart: always
+
+  ############# System #############
+  system:
+    build:
+      context: ../services/
+      dockerfile: system/Dockerfile
+    container_name: service-system
+    ports:
+      - "28098:8092"
+    environment:
+      ACTIVE: "docker"
+      # 아래 세 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
+      # 없거나 너무 짧으면 컨테이너가 기동에 실패한다. services/common/src/main/resources/default-application.properties 참고.
+      WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
+      WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
+      WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+    volumes:
+      - ../services/common/src:/common/src
+      - ../services/common/build.gradle:/common/build.gradle
+      - ../services/system/src:/app/src
+      - ../services/system/build.gradle:/app/build.gradle
+      - ../services/system/gradle:/app/gradle
+      - ../services/system/gradlew:/app/gradlew
+      - ../services/system/settings.gradle:/app/settings.gradle
+      - ../services/system/docker-gradle-cache:/root/.gradle
+    networks:
+      - net_wcnf
+    restart: always
+
+  ############# Smart-Asset #############
+  smart-asset:
+    build:
+      context: ../services/
+      dockerfile: smart-asset/Dockerfile
+    container_name: smart-asset
+    ports:
+      - "28100:8095"
+    environment:
+      ACTIVE: "docker"
+      # 유형자산 엑셀 업서트(S-213) preview 서명 키 - 값 자체는 여기(git 추적 파일)에 두지 않고
+      # 이 디렉터리의 .env(git 미추적)에 SMART_ASSET_EXCEL_SIGNING_KEY=<32바이트 이상 무작위 값>을
+      # 추가해서 넣는다. 없거나 32바이트 미만이면 컨테이너가 기동에 실패한다.
+      # 자세한 내용/회전 절차는 services/smart-asset/docs/운영/엑셀_서명키_운영가이드.md 참고.
+      SMART_ASSET_EXCEL_SIGNING_KEY: ${SMART_ASSET_EXCEL_SIGNING_KEY}
+      # 아래 세 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
+      # 없거나 너무 짧으면 컨테이너가 기동에 실패한다. services/common/src/main/resources/default-application.properties 참고.
+      WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
+      WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
+      WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+    volumes:
+      - ../services/common/src:/common/src
+      - ../services/common/build.gradle:/common/build.gradle
+      - ../services/common/kafka-codegen.gradle:/common/kafka-codegen.gradle
+      - ../services/smart-asset/src:/app/src
+      - ../services/smart-asset/build.gradle:/app/build.gradle
+      - ../services/smart-asset/gradle:/app/gradle
+      - ../services/smart-asset/gradlew:/app/gradlew
+      - ../services/smart-asset/settings.gradle:/app/settings.gradle
+      - ../services/smart-asset/docker-gradle-cache:/root/.gradle
+    networks:
+      - net_wcnf
+    restart: always
+
+  ############# Minio #############
+  minio:
+    image: minio/minio:RELEASE.2025-05-24T17-08-30Z
+    ports:
+      - "29000:9000"
+      - "29001:29001"
+    environment:
+      MINIO_ROOT_USER: ${ID}
+      MINIO_ROOT_PASSWORD: ${PW}
+    command: server /data --console-address ":29001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - net_wcnf
+    restart: always
+
+  minio-initialize:
+    image: minio/minio:RELEASE.2025-05-24T17-08-30Z
+    depends_on:
+      - minio
+    entrypoint: >
+      sh -c "sleep 10 && \
+               mc config host add local http://minio:9000 ${ID} ${PW} && \
+               mc mb local/${MINIO_BUCKET_NAME}"
+    networks:
+      - net_wcnf
+
+
+volumes:
+  postgres-data:
+  minio-data:

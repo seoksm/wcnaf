@@ -1,0 +1,186 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.toast_wrapper{
+	position: fixed;
+	right: get(margin, xlarge);
+	bottom: get(margin, xlarge);
+	opacity: 1;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	gap: calc(get(margin, default) - 2px);
+  
+	@include mobile{
+	  left: calc(get(margin, default) + get(radius, default));
+	  right: calc(get(margin, default) + get(radius, default));
+	}
+  }
+  .toastWrap {
+	position: relative;
+	display: none;
+	transition: ease-in-out 0.15s;
+	
+	.toast_loader {
+	  display: block;
+	  position: absolute;
+	  top: -0.5px;
+	  height: 3px;
+	  width: 0;
+	  left: 0;
+	  border-radius: get(radius, default);
+	  //background: linear-gradient(to right, #f1633f, #e21e1e);
+	  background: darken(get(background, main), 10);
+	  transition: width linear;
+  
+	  &.hide {
+		display: none;
+	  }
+	}
+	
+	.toast {
+	  width: 400px;
+	  display: flex;
+	  justify-content: space-between;
+	  padding: get(padding, default);
+	  background: get(background, white);
+	  border: 2px solid get(background, main);
+	  border-radius: get(radius, default);
+	  box-shadow: 0 2px 8px 2px rgba(get(background, black), 0.3);
+	  margin: 0 calc(-1 * get(radius, default));
+	  box-sizing: border-box;
+	
+	  @include mobile{
+		width: calc(100% + (get(radius, default) * 2));
+	  }
+	  .toast-head{
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: get(margin, small);
+		
+		.title {
+		  font-size: get(title, xsmall);
+		  font-weight: 700;
+		  line-height: get(form, default);
+		}
+	  }
+	  
+	  .btn-close {
+		position: relative;
+		@include WH(get(ico, default));
+		padding: 0;
+		margin: 0;
+		opacity: 1;
+		text-indent: 0;
+  
+		@include activeColor(get(base, transparent));
+  
+		i{
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  margin: 0;
+		}
+		/* &::before {
+		  top: 0px;
+		  left: 0px;
+		  background-position: -180px -80px;
+		} */
+	  }
+	
+	  .toast-conts {
+		position: relative;
+		align-self: center;
+		padding: 0;
+		color: get(text, darken);
+		font-size: get(fontsize, default);
+  
+		i{
+		  vertical-align: middle;
+		  margin: -2px get(margin, xsmall) 0 0;
+		}
+	  }
+	
+	  .toast-foot {
+		display: flex;
+		gap: 4px;
+		margin-top: get(margin, small);
+		padding-top: 8px;
+		border-top: 1px solid get(border, default);
+		
+		&.flex {
+		  justify-content: space-between;
+		}
+	  }
+	}
+  
+	&[data-toastType=danger]{
+	  .toast_loader{
+		background-color: darken(get(toast, danger), 10);
+	  }
+	  .toast{
+		background-color: get(toast, danger-light);
+		border-color: get(toast, danger);
+		box-shadow: 0 2px 8px 2px rgba(get(toast, danger), 0.3);
+	  }
+	}
+	&[data-toastType=warning]{
+	  .toast_loader{
+		background-color: darken(get(toast, warning), 10);
+	  }
+	  .toast{
+		background-color: get(toast, warning-light);
+		border-color: get(toast, warning);
+		box-shadow: 0 2px 8px 2px rgba(get(toast, warning), 0.3);
+	  }
+	}
+	&[data-toastType=success]{
+	  .toast_loader{
+		background-color: darken(get(toast, success), 10);
+	  }
+	  .toast{
+		background-color: get(toast, success-light);
+		border-color: get(toast, success);
+		box-shadow: 0 2px 8px 2px rgba(get(toast, success), 0.3);
+	  }
+	}
+	&[data-toastType=info]{
+	  .toast_loader{
+		background-color: darken(get(toast, info), 10);
+	  }
+	  .toast{
+		background-color: get(toast, info-light);
+		border-color: get(toast, info);
+		box-shadow: 0 2px 8px 2px rgba(get(toast, info), 0.3);
+	  }
+	}
+  
+	.toast_loaded {
+	  width: 100%;
+	}
+  
+	// @for $i from 0 through 12 {
+	//   &:nth-of-type(#{$i}) {
+	//     margin-bottom: (($i - 1) * 5%);
+	//   }
+	// }
+  }
+  
+  .toast {
+  
+	&.bootstrap {
+  
+	  .toast-header {
+  
+		.btn-close {
+		  padding: 0;
+		  margin-right:0;
+  
+		  @include activeColor(get(base, transparent));
+	  
+		  &::before {
+			display: none;
+		  }
+		}
+	  }
+	}
+}

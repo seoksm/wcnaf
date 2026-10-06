@@ -1,0 +1,85 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.krds-side-navigation{
+	.lnb-tit{
+		position: relative;
+		@include flex;
+		color: get(text, white);
+		padding: 0;
+		height: rem(80px);
+		border-bottom: 0;
+
+		&::before{
+			content: '';
+			@include posi_all;
+			z-index: -1;
+			@include bgimg('bg_pagetitle.svg', $size: contain, $posi: center);
+		}
+	}
+
+	.lnb-list{
+		margin-top: get(content-margin, xlarge);
+
+		.lnb-item{
+			border-bottom: 0;
+		}
+		> li.lnb-item{
+			border-bottom: 0;
+
+			// &:not(:last-child){
+			// 	margin-bottom: get(margin, xsmall);
+			// }
+			
+			> .lnb-btn{
+				border-top-left-radius: 100px;
+				padding: get(padding, large) calc(get(padding, large) * 2);
+				@include font_weight(normal);
+				font-size: get(fontsize, default);
+				line-height: 1.2;
+				color: get(text, default);
+				min-height: 30px;
+				border-bottom: 1px solid get(border, default);
+
+				&::before{
+					content: '';
+					@include posi_all;
+					@include WH(100%);
+					z-index: -1;
+					background-color: get(background, main);
+					border-bottom-left-radius: rem(100px);
+					opacity: 0;
+				}
+				&.active, &.selected{
+					background-color: get(background, main);
+					color: get(text, white);
+					border-bottom: 0;
+					padding-left: get(content-margin, xlarge);
+					
+					&::before{
+						opacity: 0.5;
+					}
+					&::after{
+						background-color: get(background, white);
+					}
+				}
+				&:hover{
+					background-color: rgba(get(background, main), 0.7) !important;
+					color: get(text, white);
+					border-top-left-radius: rem(30px);
+				}
+			}
+			/* .lnb-submenu{
+				transition: none;
+			} */
+		}
+		.lnb-submenu-lv2{
+			> ul{
+				> li{
+					&.lnb-item{
+						border-bottom: 0;
+					}
+				}
+			}
+		}
+	}
+}

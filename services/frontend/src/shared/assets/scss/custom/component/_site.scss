@@ -1,0 +1,120 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.g-wrap #krds-header:not(.sample){
+	.header-branding .logo{
+		@media screen and (max-width: 1024px){
+			width: 13.7rem;
+		}
+	}
+	.header-actions .krds-main-menu .gnb-main-trigger.selected::before{
+		z-index: 1;
+		bottom: calc(get(margin, xlarge) * -1);
+	}
+}
+
+.g-wrap {
+	.page-title-wrap .h-tit{
+		font-size: get(title, xxxlarge);
+		
+		@media screen and (max-width: 760px){
+			font-size: get(title, default);
+			line-height: 1.4;
+		}
+		.badge-text{
+			letter-spacing: rem(-0.1px);
+		}
+	}
+	.g-code-wrap{
+		margin-top: get(content-margin, default);
+
+		.g-code-box{
+			margin-top: get(margin, xlarge);
+	
+			.highlight{
+				width: 100%;
+				margin: 0;
+				overflow: auto;
+				max-height: 200px;
+				@include scrollbar;
+	
+				code.hljs{
+					padding: get(padding, xlarge) calc(get(padding, xlarge) * 2);
+					font-family: consolas;
+				}
+			}
+			.toolbar .toolbar-item .copy-to-clipboard-button{
+				@include transition(0.6);
+				&[data-copy-state=complete]{
+					background-color: get(gray, 333);
+				}
+			}
+		}
+	}
+}
+
+.content_util_wrap{
+	@include flex(flex, center, space-between);
+	flex-wrap: wrap;
+	margin: rem(64px) 0 rem(48px);
+	gap: get(margin, small);
+
+	.content_util{
+		display: flex;
+		gap: get(margin, default);
+
+		button{
+			@include flex;
+			@include WH(get(btnsize, default));
+			border: 1px solid get(border, default);
+			border-radius: 50%;
+		}
+	}
+}
+
+.g-wrap #container{
+	.in-between{
+		padding-bottom: rem(120px);
+		gap: rem(96px);
+
+		.krds-side-navigation{
+			width: rem(260px);
+			padding-top: rem(64px);
+		}
+	}
+	> .in-between{
+		//padding-left: 0;
+		padding-left: get(content-margin, default);
+		padding-right: get(content-margin, default);
+	}
+}
+
+.g-wrap #krds-footer:not(.sample) .f-logo{
+	@include bgimg('logo.svg');
+}
+
+// 컴포넌트 소개
+.g-wrap .g-search-area .krds-structured-list .card-top .img-wrap{
+	background-color: get(background, white);
+
+	@mixin thumb($file){
+		&.thumb_#{$file}{
+			@include bgimg('guide/contents/main/thumb_#{$file}.png');
+		}
+	}
+	$thumb:
+	tab, list, button, radio, checkbox, select, datepicker, textarea, input, table, info;
+
+	@for $i from 1 through length($thumb){
+		$name: nth($thumb, $i);
+		@if $name != "" and $name != null{
+			@include thumb($name);
+		}
+	}
+	
+}
+
+@media (max-width: 1023px) {
+	.content_util_wrap{
+		margin: get(content-margin, xlarge) 0 get(content-margin, large);
+	}
+}

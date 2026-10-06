@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Wed May 11 15:49:38 KST 2016-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+ * @Class Name 	: UserMapper_SQL.xml
+ * @Description : 
+ * @Modification Information
+ * 
+ * 수정일				수정자			수정내용
+ * ==========		=======		===================
+ * 2024.01.15.		htec-		최초작성
+ * 
+ * @author htec-
+ * @since 2024.01.15.
+ * @version
+ * @see
+-->
+<mapper namespace="com.winitech.system.infrastructure.user.UserMapper">
+	<sql id="userColumns">
+		U.ID,      				U.USERNAME,     		U.FIRST_NAME,  	U.LAST_NAME, 	U.EMAIL,             
+		U.JOIN_STATUS,  		U.PHONE_NUMBER,			U.STATUS,      	U.FULL_NAME, 	U.DEPARTMENT_ID,
+		DEPT.DEPARTMENT_CODE, 	DEPT.DEPARTMENT_NAME, 	U.DUTY_NAME,    U.EMPLOYEE_NO,  U.CREATE_AT,			
+		U.UPDATE_AT	
+  	</sql>
+	
+	<resultMap id="userResultMap" type="com.winitech.system.domain.user.User">
+		<id column="ID" property="id" javaType="java.util.UUID"/>
+		<result column="USERNAME" property="username"/>
+		<result column="FIRST_NAME" property="firstName"/>
+		<result column="LAST_NAME" property="lastName"/>
+		<result column="FULL_NAME" property="fullName"/>
+		<result column="EMAIL" property="email"/>
+		<result column="PHONE_NUMBER" property="phoneNumber"/>
+		<result column="EMPLOYEE_NO" property="employeeNo"/>
+		<result column="DUTY_NAME" property="dutyName"/>
+		<result column="JOIN_STATUS" property="joinStatus" javaType="com.winitech.system.domain.user.User$JoinStatus"/>
+		<result column="STATUS" property="status" javaType="com.winitech.system.domain.user.User$Status" />
+		
+		<result column="HASHED_PASSWORD" property="hashedPassword" />
+		
+		<result column="CREATE_AT" property="createAt" javaType="java.time.OffsetDateTime"/>
+		<result column="UPDATE_AT" property="updateAt" javaType="java.time.OffsetDateTime"/>
+
+		<association property="department" javaType="com.winitech.system.domain.department.Department">
+			<id column="DEPARTMENT_ID" property="id" javaType="java.util.UUID"/>
+			<result column="DEPARTMENT_CODE" property="departmentCode" />
+			<result column="DEPARTMENT_NAME" property="departmentName" />
+		</association>
+	</resultMap>
+	
+	<select id="findByIdAndStatus" resultMap="userResultMap">
+		SELECT <include refid="userColumns"/>
+		  FROM USERS U
+		  LEFT JOIN DEPARTMENT DEPT ON U.DEPARTMENT_ID = DEPT.ID
+		 WHERE U.ID = #{id}::uuid
+		   AND U.STATUS = #{status}
+		 ORDER BY U.FULL_NAME, U.ID
+	</select>
+	
+	<select id="findByIdInAndStatus" resultMap="userResultMap">
+		SELECT <include refid="userColumns"/>
+		  FROM USERS U
+		  LEFT JOIN DEPARTMENT DEPT ON U.DEPARTMENT_ID = DEPT.ID
+		<where>
+		   <if test="userIdList != null and userIdList.size() > 0">
+				U.ID IN
+				<foreach item="id" index="index" collection="userIdList" open="(" separator="," close=")">
+					#{id}::uuid
+				</foreach>
+		   </if>
+		   AND U.STATUS = #{status}
+		</where>
+		 ORDER BY U.FULL_NAME, U.ID
+	</select>
+	
+	<select id="findByUsernameAndStatus" resultMap="userResultMap">
+		SELECT U.HASHED_PASSWORD, <include refid="userColumns"/>
+		  FROM USERS U
+		  LEFT JOIN DEPARTMENT DEPT ON U.DEPARTMENT_ID = DEPT.ID
+		 WHERE U.USERNAME = #{username}
+		   AND U.STATUS = #{status}
+		 ORDER BY U.FULL_NAME, U.ID
+	</select>
+	
+	<select id="findAllByStatus" resultMap="userResultMap">
+		SELECT <include refid="userColumns"/>
+		  FROM USERS U
+		  LEFT JOIN DEPARTMENT DEPT ON U.DEPARTMENT_ID = DEPT.ID
+		 WHERE U.STATUS = #{status}
+ 		 ORDER BY U.FULL_NAME, U.ID
+	</select>
+	
+	<select id="findAllByStatusAndIdIn" resultMap="userResultMap">
+		SELECT <include refid="userColumns"/>
+		  FROM USERS U
+		  LEFT JOIN DEPARTMENT DEPT ON U.DEPARTMENT_ID = DEPT.ID
+		<where>
+		   U.STATUS = #{status}
+		   <if test="userIdList != null and userIdList.size() > 0">
+				AND U.ID IN
+				<foreach item="id" index="index" collection="userIdList" open="(" separator="," close=")">
+					#{id}::uuid
+				</foreach>
+		   </if>
+		</where>
+		 ORDER BY U.FULL_NAME, U.ID
+	</select>
+	
+	<select id="findAllByStatusAndJoinStatus" resultMap="userResultMap">
+		SELECT <include refid="userColumns"/>
+		  FROM USERS U
+		  LEFT JOIN DEPARTMENT DEPT ON U.DEPARTMENT_ID = DEPT.ID
+		 WHERE U.STATUS = #{status}
+		   AND U.JOIN_STATUS = #{joinStatus}
+		 ORDER BY U.FULL_NAME, U.ID
+	</select>
+	
+	<select id="existsByEmailAndStatus" resultType="java.lang.Boolean">
+		SELECT COUNT(1) > 0
+		  FROM USERS
+		 WHERE EMAIL = #{email}
+		   AND STATUS = #{status}
+	</select>
+	
+	<insert id="insertUser" parameterType="com.winitech.system.domain.user.User">
+		INSERT INTO USERS (ID,          USERNAME,     	FIRST_NAME,  LAST_NAME, EMAIL,
+						   JOIN_STATUS, PHONE_NUMBER, 	STATUS,      FULL_NAME, DEPARTMENT_ID,
+						   DUTY_NAME,  	EMPLOYEE_NO,	CREATE_AT,	 UPDATE_AT)
+		VALUES (#{id}::uuid,    #{username},    #{firstName},	#{lastName}, #{email},
+				#{joinStatus},	#{phoneNumber}, #{status},      #{fullName}, #{department.id}::uuid, 	
+				#{dutyName},   	#{employeeNo},  NOW(),		  	NOW())
+	</insert>
+	
+	<update id="updateUser" parameterType="com.winitech.system.domain.user.User">
+		UPDATE USERS
+		   SET USERNAME           = #{username},
+			   FIRST_NAME         = #{firstName},
+			   LAST_NAME          = #{lastName},
+			   EMAIL              = #{email},
+
+			   JOIN_STATUS        = #{joinStatus},
+			   PHONE_NUMBER       = #{phoneNumber},
+			   STATUS             = #{status},
+			   FULL_NAME          = #{fullName},
+			   DEPARTMENT_ID      = #{department.id}::uuid,
+
+			   DUTY_NAME          = #{dutyName},
+			   EMPLOYEE_NO        = #{employeeNo},
+			   UPDATE_AT          = NOW()
+		 WHERE ID = #{id}::uuid
+	</update>
+</mapper>

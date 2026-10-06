@@ -1,0 +1,67 @@
+basePackage: "com.winitech.smartAsset"
+
+example:
+  eventName:
+    description: 설명
+    topic: 토픽
+    domain: 도매인
+    broker: kafka (현재 카프카만지원)
+    dto:
+      - name: "int변수명"
+        type: "Integer"
+      - name: "문자열리스트변수명"
+        type: "List<String>"
+      - name: "enum변수명"
+        type: "enum"
+        enumClass:
+          name: "enum명"
+          constants:
+            - name: "s"
+              value: "sync"
+      - name: "커스텀 enum변수명"
+        type: "enum"
+        enumClass:
+          path: "com.winitech.smartAsset.interfaces.inboundAdapter.eventListener.common.TEST_ENUM"
+      - name: "리스트변수명"
+        type: "list"
+        items:
+          - name: "test"
+            type: "Long"
+            example: "24321"
+      - name: "객체변수명"
+        type: "object"
+        items:
+          - name: "test"
+            type: "Long"
+      - name: "koko"
+        useObj: "ObejctName"
+  eventName2:
+    description: 설명
+    topic: 토픽
+    domain: 도매인
+    broker: kafka (현재 카프카만지원)
+    useObj: ObejctName
+
+obj:
+  ObejctName:
+    name: ObjectName
+    domain: common
+    dto:
+      - name: "intval"
+        type: "Integer"
+      - name: "stringval"
+        type: "List<String>"
+      - name: "gg"
+        type: "enum"
+        enumClass:
+          name: "enum명"
+          constants:
+            - name: "s"
+              value: "sync"
+      - name: "kk"
+        type: "enum"
+        enumClass:
+          path: "com.winitech.smartAsset.interfaces.inboundAdapter.eventListener.common.TEST_ENUM"
+          constants:
+            - name: "s"
+              value: "sync"

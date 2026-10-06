@@ -1,0 +1,20 @@
+%% 자세한 문법은 https://mermaid.js.org/syntax/classDiagram.html 참조
+classDiagram
+    class Person {
+        +String name
+        +int age
+        +void greet()
+    }
+
+    class Student {
+        +int studentId
+        +void study()
+    }
+
+    class Teacher {
+        +int employeeId
+        +void teach()
+    }
+
+    Person <|-- Student
+    Person <|-- Teacher

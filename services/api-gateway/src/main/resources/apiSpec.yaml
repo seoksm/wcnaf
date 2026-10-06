@@ -1,0 +1,494 @@
+openapi: '3.0.3'
+info:
+  title: API Title
+  version: '1.0'
+servers:
+  - url: /api/v1/api-gateway
+tags:
+  - name: Route
+    description: Route Controller
+  - name: Predicate
+    description: Predicate Controller
+paths:
+  ##########################
+  # Route
+  ##########################
+  /route:
+    post:
+      tags:
+        - Route
+      summary: route 등록
+      operationId: registerRoute
+      description: ROUTE를 등록합니다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteStoreRequestDto"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteStoreResponseDto"
+    get:
+      tags:
+        - Route
+      summary: route 목록조회
+      operationId: searchRoute
+      description : ROUTE 목록을 조회합니다.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/searchType'
+        - $ref: '#/components/parameters/searchKeyword'
+        - $ref: '#/components/parameters/searchStatus'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RouteResponseDto"
+  /route/{routeId}:
+    get:
+      tags:
+        - Route
+      summary: route 조회
+      operationId: searchRouteInfo
+      description: ROUTE를 조회합니다.
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+          description: Route ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteResponseDto"
+    delete:
+      tags:
+        - Route
+      summary: route 삭제
+      operationId: removeRoute
+      description: ROUTE를 삭제합니다.
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+          description: Route ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+              example: OK
+    patch:
+      tags:
+        - Route
+      summary: route 수정
+      operationId: modifyRoute
+      description: 프로그램을 수정합니다.
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+          description: Route ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteStoreRequestDto"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteStoreResponseDto"
+  /route/all:
+    get:
+      tags:
+        - Route
+      summary: route 전체조회
+      operationId: searchAllRoute
+      description: ROUTE를 전체 조회합니다.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RouteResponseDto"
+  /route/reload:
+    get:
+      tags:
+        - Route
+      summary: route 갱신
+      operationId: reloadRoute
+      description: ROUTE를 갱신합니다.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+              example: OK
+
+
+  ##########################
+  # Predicate
+  ##########################
+  /route/{routeId}/predicate:
+    post:
+      tags:
+        - Predicate
+      summary: predicate 등록
+      operationId: registerPredicate
+      description: predicate를 등록합니다.
+      parameters:
+        - name: routeId
+          in: path
+          description: Route ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PredicateStoreRequestDto"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PredicateStoreResponseDto"
+
+    get:
+      tags:
+        - Predicate
+      summary: predicate 목록조회
+      operationId: searchAllPredicate
+      description: Predicate 목록을 조회합니다.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/searchType'
+        - $ref: '#/components/parameters/searchKeyword'
+        - $ref: '#/components/parameters/searchStatus'
+        - name: routeId
+          in: path
+          description: Route ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+        - name: searchPredicateType
+          in: query
+          description: Predicate 유형
+          required: false
+          schema:
+            type: string
+            enum: [COOKIE, HEADER, METHOD, PATH, HOST, QUERY, WEIGHT]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PredicateResponseDto"
+
+  /route/{routeId}/predicate/{predicateId}:
+    post:
+      tags:
+        - Predicate
+      summary: predicate 조회
+      operationId: searchPredicateInfo
+      description: predicate를 조회
+      parameters:
+        - name: routeId
+          in: path
+          description: Route ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+        - name: predicateId
+          in: path
+          description: Predicate ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PredicateResponseDto"
+
+    delete:
+      tags:
+        - Predicate
+      summary: predicate 삭제
+      operationId: removePredicate
+      description: Predicate를 삭제합니다.
+      parameters:
+        - name: routeId
+          in: path
+          description: Route ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+        - name: predicateId
+          in: path
+          description: Predicate ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+              example: OK
+    patch:
+      tags:
+        - Predicate
+      summary: predicate 수정
+      operationId: modifyPredicate
+      description: Predicate를 수정합니다.
+      parameters:
+        - name: routeId
+          in: path
+          description: Route ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+        - name: predicateId
+          in: path
+          description: Predicate ID
+          required: true
+          schema:
+            type: string
+            format: UUID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PredicateStoreRequestDto"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PredicateStoreResponseDto"
+
+components:
+  schemas:
+    RouteStoreRequestDto:
+      type: object
+      required:
+        - uri
+        - sortSeq
+        - status
+      properties:
+        name:
+          type: string
+          example: user-service
+          description: Route 이름
+        uri:
+          type: string
+          example: http://localhost:8092
+          description: Route URI
+#          minLength: 1
+#          pattern: '^(?!\s*$).+$'
+        sortSeq:
+          type: integer
+          example: 1
+          description: Route 정렬순서
+          minLength: 1
+        status:
+          type: string
+          enum: [ENABLE, DISABLE]
+          example: ENABLE
+          description: Route 사용여부
+    RouteStoreResponseDto:
+      type: object
+      properties:
+        routeId:
+          type: string
+          format: UUID
+          example: 017b6b3b-1b3b-4b6b-8b3b-1b3b4b6b8b3b
+          description: Route ID
+    RouteResponseDto:
+      type: object
+      properties:
+        routeId:
+          type: string
+          format: UUID
+          example: 017b6b3b-1b3b-4b6b-8b3b-1b3b4b6b8b3b
+          description: Route ID
+        name:
+          type: string
+          example: user-service
+          description: Route 이름
+        uri:
+          type: string
+          example: http://localhost:8092
+          description: Route URI
+        sortSeq:
+          type: integer
+          example: 1
+          description: Route SortSeq
+        status:
+          type: string
+          enum: [ENABLE, DISABLE]
+          example: ENABLE
+          description: Route 상태
+
+    PredicateStoreRequestDto:
+      type: object
+      required:
+        - predicateType
+        - key
+        - definition
+        - status
+      properties:
+        predicateType:
+          type: string
+          enum: [COOKIE, HEADER, METHOD, PATH, HOST, QUERY, WEIGHT]
+          example: PATH
+          description: Predicate 유형
+        key:
+          type: string
+          example: X-Request-ID
+          description: Predicate Key
+#          minLength: 1
+#          pattern: '^(?!\s*$).+$'
+        definition:
+          type: string
+          example: ABCD
+          description: Predicate 정의
+#          minLength: 1
+#          pattern: '^(?!\s*$).+$'
+        status:
+          type: string
+          enum: [ENABLE, DISABLE]
+          example: ENABLE
+          description: Predicate 상태
+    PredicateStoreResponseDto:
+      type: object
+      properties:
+        predicateId:
+          type: string
+          format: UUID
+          example: 017b6b3b-1b3b-4b6b-8b3b-1b3b4b6b8b3b
+          description: Predicate ID
+    PredicateResponseDto:
+      type: object
+      properties:
+        predicateId:
+          type: string
+          format: UUID
+          example: 017b6b3b-1b3b-4b6b-8b3b-1b3b4b6b8b3b
+          description: Predicate ID
+        routeId:
+          type: string
+          format: UUID
+          example: 017b6b3b-1b3b-4b6b-8b3b-1b3b4b6b8b3b
+          description: Route ID
+        predicateType:
+          type: string
+          enum: [COOKIE, HEADER, METHOD, PATH, HOST, QUERY, WEIGHT]
+          example: PATH
+          description: Predicate 유형
+        key:
+          type: string
+          example: X-Request-ID
+          description: Predicate Key
+        definition:
+          type: string
+          example: ABCD
+          description: Predicate 정의
+        status:
+          type: string
+          enum: [ENABLE, DISABLE]
+          example: ENABLE
+          description: Predicate 상태
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: 페이지 번호 (0부터 시작)
+      required: false
+      schema:
+        type: integer
+        format: int32
+        example: 0
+    pageSize:
+      name: pageSize
+      in: query
+      description: 페이지 사이즈
+      required: false
+      schema:
+        type: integer
+        format: int32
+        example: 10
+    searchType:
+      name: searchType
+      in: query
+      description: 검색유형
+      required: false
+      schema:
+        type: string
+        enum: [NAME, URI]
+    searchKeyword:
+      name: searchKeyword
+      in: query
+      description: 검색어
+      required: false
+      schema:
+        type: string
+    searchStatus:
+      name: searchStatus
+      in: query
+      description: 상태
+      required: false
+      schema:
+        type: string
+        enum: [ENABLE, DISABLE]
+

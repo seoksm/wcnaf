@@ -1,0 +1,351 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+table{
+	th{
+		.check-area{
+			justify-content: center;
+		}
+	}
+}
+
+.tbl-list {
+
+    &:not(:first-of-type) {
+        margin-top: get(content-margin, xxlarge);
+    }
+
+    &:first-child,
+    &:first-child:last-child {
+        margin: 0;
+    }
+
+    table {
+        border-top: 2px solid get(table, main);
+    }
+
+    th,
+    td {
+        padding: get(padding, xlarge);
+        color: get(text, darken);
+        border-bottom: 1px solid get(table, border);
+
+        >* {
+            vertical-align: middle;
+        }
+		&:not(:first-child){
+			border-left: 1px solid get(table, border);
+		}
+		&:first-child[rowspan]{
+			border-left: 0;
+		}
+    }
+
+    th {
+        padding: 8px;
+        color: get(text, dark);
+        @include font_weight(SemiBold);
+        text-align: center;
+        background: get(table, th);
+        border-bottom: 1px solid get(table, border);
+		word-break: break-all;
+    }
+
+	tr.rowspan{
+		th, td{
+			&:first-child{
+				border-left: 1px solid get(table, border);
+			}
+		}
+	}
+    tbody {
+        tr {
+            td {
+                //height: get(form, large);
+                color: get(text, default);
+                @include font_weight(normal);
+                text-align: center;
+                background: get(table, td);
+                //cursor: pointer;
+
+                .date {
+                    color: get(text, light);
+                    font-size: get(fontsize, small);
+                }
+
+                &:last-child {
+                    border-right: none;
+                }
+
+                a {
+                    position: relative;
+                    display: inline-block;
+                    vertical-align: middle;
+
+					&.btn-link{
+						display: inline-flex;
+						align-items: center;
+						line-height: 1.1;
+					}
+                }
+				&:has(i),
+				&:has(.area-icofile) {
+					
+					.title {
+						float: left;
+						margin-right: 4px;
+                        align-self: center;
+						word-break: break-all;
+					}
+
+					i {
+						vertical-align: -webkit-baseline-middle;
+					}
+
+					.area-icofile {
+						margin-left: 4px;
+					}
+				}
+
+				.krds-info-list{
+					display: inline-flex;
+				}
+            }
+
+            /* &:not([onclick]) {
+                &:hover {
+                    td {
+                        color: get(text, dark);
+                        background: get(background, light);
+                    }
+                }
+            } */
+
+            &.selected:not([onclick]) {
+                td {
+					color: get(text, white);
+                    background: get(background, light);
+
+                }
+            }
+			&[onclick]{
+				&:hover, &:focus{
+					th, td{
+						background: get(background, hover);
+					}
+				}
+			}
+        }
+    }
+	tfoot{
+		th, td{
+			text-align: center;
+		}
+	}
+
+    &:not(:has(thead)) {
+        tbody {
+            td {
+                text-align: left;
+            }
+        }
+    }
+
+	&.align_left{
+		tbody{
+			tr{
+				td{
+					text-align: left;
+
+					&:has(.img_box){
+						text-align: center;
+					}
+				}
+			}
+		}
+	}
+	.total{
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		gap: get(margin, default) get(margin, xlarge);
+		font-size: get(fontsize, xlarge);
+
+		&-box{
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: get(padding, default) 0;
+		}
+		p{
+			color: get(text, main);
+			@include font_weight;
+		}
+	}
+
+	.desc-box{
+		+ table{
+			margin-top: get(margin, default);
+		}
+	}
+
+	> .req_guide:first-child{
+		font-size: get(fontsize, default);
+		line-height: 1.5;
+		margin-top: calc(get(fontsize, default) * -1.5);
+	}
+
+	&.thema_ {
+		&green {
+			
+			table {
+				border-color: #199564;
+			}
+
+			th {
+				background: #E3FFF4;
+
+				&.bold {
+					background: #9FFFD9;
+				}
+			}
+		}
+
+		&gray {
+			table {
+				border-color: get(gray, 999);
+			}
+			
+			th {
+				// background: #F8F8F8;
+				background: get(background, offwhite);
+
+				&.bold {
+					background: get(background, light-gray);
+				}
+			}
+		}
+
+		&purple {
+			table {
+				border-color: #7112A2;
+			}
+
+			th {
+				background: #F9EAFF;
+
+				&.bold {
+					background: #F2CFFF;
+				}
+			}
+		}
+
+		&yellow {
+			table {
+				border-color: #9C8819;
+			}
+			
+			th {
+				background: #FDFBF1;
+
+				&.bold {
+					background: #FFF4B8;
+				}
+			}
+		}
+	}
+
+	&.tbl-card{
+		@include tabletLess{
+			@include tbl-card-list;
+		}
+	}
+}
+
+.tb-scroll_wrap{
+	position: relative;
+
+	.tb-scroll_box{
+		max-height: rem(500px);
+		overflow-y: auto;
+		//border: 1px solid $co-border-default;
+		border: solid get(table, border);
+		border-width: 1px 0;
+		//border-width: 2px 0 1px;
+		//border-top-color: $co-main;
+		margin-bottom: -1px;
+	}
+	&.tbl-scrollX{
+		&.only_x{
+			.tb-scroll_box{
+				max-height: none;
+			}
+		}
+		table{
+			min-width: 900px;
+		}
+		&.small{
+			table{
+				min-width: 600px;
+			}
+		}
+	}
+
+	table {
+		border-width: 0 1px 1px;
+
+		.tbl-list & {
+			border-width: 0 1px 1px;
+		}
+
+		thead {
+			position: sticky;
+			top: 0;
+			z-index: 4;
+
+			tr {
+				th {
+					position: relative;
+					border-bottom: 0 !important;
+
+					&::before {
+						content: '';
+						@include absolute_blr;
+						height: 1px;
+						background-color: get(table, border);
+					}
+				}
+			}
+		}
+
+		tbody tr {
+			&:last-of-type {
+
+				th,
+				td {
+					border-bottom: 0;
+				}
+			}
+		}
+
+		&:has(thead) {
+			thead {
+				tr:first-child {
+					th {
+						border-top: 0;
+					}
+				}
+			}
+		}
+
+		&:not(:has(thead)) {
+			tbody {
+				tr:first-child {
+					th,
+					td {
+						border-top: 0;
+					}
+				}
+			}
+		}
+	}
+}

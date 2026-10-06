@@ -1,0 +1,338 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+$file_btn_h : 36px;
+
+.file_box {
+	position: relative;
+
+	.file_input {
+		position: relative;
+		display: inline-block;
+		height: $file_btn_h;
+		width: 100%;
+		color: #999999;
+		vertical-align: middle;
+		box-sizing: border-box;
+
+		input {
+
+			&[type="file"] {
+				position: absolute;
+				width: 0;
+				height: 0;
+				padding: 0;
+				overflow: hidden;
+				border: 0;
+			}
+
+
+			// &:focus{
+
+			//   + label{
+			//     @include activeColor($co-btn-sub);
+			//   }
+			// }
+
+			+label {}
+		}
+
+		label {
+			position: absolute;
+			right: 0;
+			top: 0;
+			display: inline-flex;
+			align-items: center;
+			min-width: auto;
+			max-height: $file_btn_h;
+			border-radius: get(radius, default);
+			color: get(text, white);
+			font-size: get(fontsize, default);
+			text-align: center;
+			z-index: 2;
+			cursor: pointer;
+		}
+
+		+.file {
+			&_add {
+				margin-top: 0;
+			}
+
+			&-add {
+				margin-top: 42px;
+			}
+		}
+	}
+
+	&.type_02 {
+		display: flex;
+		width: 100%;
+		margin-top: get(margin, xsmall);
+
+		.file_drop {
+			min-width: calc(100% - 120px - 3px);
+			max-height: $file_btn_h;
+			margin: 0;
+		}
+
+		.info_box {
+			min-width: auto;
+			border: none;
+			border-radius: 0;
+		}
+
+		.file_input {
+			margin-left: 3px;
+
+			label.btn-comm {
+				position: relative;
+				right: auto;
+				top: auto;
+				min-width: 120px;
+				font-weight: 600;
+			}
+		}
+
+		&.fl_col {
+			flex-direction: column;
+
+			.file_input {
+				margin-top: 3px;
+				margin-left: 0;
+
+				label.btn-comm {
+					width: 100%;
+				}
+			}
+		}
+	}
+}
+
+.file {
+
+	//방금등록한 파일 리스트
+	&_add {
+		position: relative;
+		display: flex;
+		width: 100%;
+		text-align: left;
+		flex-direction: column;
+		padding: get(padding, default);
+
+		&:empty {
+			display: none;
+		}
+
+		li {
+			position: relative;
+			padding-right: calc(get(padding, large) * 2);
+			color: get(text, dark);
+			padding: 0 40px 0 get(padding, default);
+			display: flex;
+			align-items: center;
+
+
+			&:not(:last-of-type) {
+				padding-bottom: get(padding, large);
+				margin-bottom: get(margin, small);
+				border-bottom: 1px solid get(border, default);
+			}
+
+			strong {
+				display: inline-block;
+				vertical-align: bottom;
+				max-width: calc(100% - 170px);
+				margin-right: get(margin, default);
+			}
+
+			.file_del {
+				$del_size : get(ico, default);
+				@include WH($del_size);
+				@include absolute_tr(50%, 0);
+				transform: translateY(-50%);
+				@include flex;
+			}
+
+			@media screen and (max-width: 600px){
+				flex-direction: column;
+				align-items: flex-start;
+
+				strong{
+					max-width: 100%;
+				}
+			}
+			a:not(.file_del) {
+				display: block;
+				color: get(text, dark);
+				@include txtElp;
+
+				// i.ico-file {
+				//   $co-sub2
+				// }
+
+				&:hover {
+					text-decoration: underline;
+				}
+
+				&:empty,
+				&:has(ul:empty) {
+					display: none;
+				}
+
+				&+button.btn-ico {
+					@include btnIco($icoPos : none, $btnSize : 20px, $icoSize : 20px);
+					width: 20px;
+
+					position: absolute;
+					right: 0;
+					top: 50%;
+					transform: translateY(-50%);
+				}
+			}
+		}
+
+		.tbl-edit & {
+			width: calc(100% + 20px);
+			margin: 0 -10px;
+			padding: 0 10px 10px 10px;
+			border-bottom: 1px solid #81B4E1;
+		}
+	}
+
+	//등록되어있는 파일 리스트(원래 등록되어있던거 뿌리는용도)
+	&-add {
+		position: relative;
+		min-height: $file_btn_h;
+
+		&:not(:first-child) {
+			margin-top: 6px;
+			padding-top: 6px;
+			border-top: 1px solid get(border, default);
+		}
+
+		li {
+			position: relative;
+
+			&:not(:first-child) {
+				margin-top: 5px;
+			}
+
+			a {
+				&:not(.file_del) {
+					position: relative;
+					display: block;
+					min-height: $file_btn_h;
+					background-color: get(gray, bbb);
+					border-radius: get(radius, default);
+					overflow: hidden;
+					padding: 6px $file_btn_h 6px 12px;
+
+					&:hover {
+						background-color: get(background, main);
+					}
+
+					img {
+						vertical-align: bottom;
+					}
+				}
+
+				&.file_del {
+					$del_size : $file_btn_h - 1;
+					text-indent: -99999px;
+					text-align: left;
+					margin-top: - calc($del_size / 2);
+				}
+			}
+		}
+	}
+
+	&_drop {
+		position: relative;
+		margin: 4px 0 8px 0;
+		border: 1px solid get(border, default);
+		border-radius: get(radius, default);
+		overflow: hidden;
+
+		.file_inner {
+			position: relative;
+			height: 140px;
+			overflow-y: auto;
+			transition: 0.15s;
+
+			>a:hover,
+			&.drop-zone-dragover {
+				background-color: #dce9ee;
+			}
+		}
+
+		.no_upload {
+			position: relative;
+			display: inline-block;
+			width: 100%;
+			height: 100%;
+			color: get(text, light);
+			font-size: get(fontsize, default);
+			text-align: center;
+			line-height: 140px;
+
+			p {
+				line-height: unset;
+			}
+		}
+
+		.info_box {
+			position: relative;
+			padding: get(padding, small) get(padding, default);
+
+			&:hover {
+				background-color: #dce9ee;
+			}
+
+			p {
+				display: inline-block;
+				padding-right: 10px;
+				color: get(text, black);
+				font-size: 16px;
+				vertical-align: bottom;
+
+				max-width: calc(100% - 20px - 60px - 20px);
+			}
+
+			span {
+				color: #999;
+				vertical-align: middle;
+			}
+
+			.file_del {
+				$del_size : get(ico, small);
+
+				position: relative;
+				border-radius: 50%;
+				text-indent: -99999px;
+				text-align: left;
+				overflow: hidden;
+				width: $del_size;
+				height: $del_size;
+				vertical-align: middle;
+				background: get(background, warn);
+
+				@include beforeConts {
+					top: 7px;
+					left: 4px;
+					width: 8px;
+					height: 1px;
+					background: #fff;
+					transform: rotate(45deg);
+				}
+
+				@include afterConts {
+					top: 7px;
+					left: 4px;
+					width: 8px;
+					height: 1px;
+					background: #fff;
+					transform: rotate(-45deg);
+				}
+			}
+		}
+	}
+}

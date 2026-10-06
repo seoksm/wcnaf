@@ -1,0 +1,17 @@
+## event-sec
+- 개요 : 이벤트 subscribe 와 publisher 를 자동 생성해주는 기능
+- 필요
+  - gradle의 common 추가 ```implementation project(':common')```)
+  - gradle에 생성기 추가```apply from: "${project(':common').projectDir}/kafka-codegen.gradle"```
+  - src/main/resources/eventSpec.yml 추가
+  - properties에 ```spring.kafka.listener.ack-mode=manual``` 추가 필수 (기존 구독에 영향 확인)
+- 사용법
+  - eventSpec.yml 에서 sub 와 pub 를 작성한다 (참고 example)
+  - gradle build하면 인터페이스, 구현체, dto 자동생성
+- 주의사항
+  - 이미 생성된 소스는 yml 에서 제거되어도 삭제되지 않음 (수동삭제 필요), 단 덮어쓰기는 동작함
+  - 현시점에서 (v0.1) KAFKA 만 제공
+- 패치사항
+  - 0.2 : 개발자가 생성한 enum 사용할수있는 기능 추가
+  - 0.3 : 공통 dto 사용할수있는 기능 추가
+  - 0.4 : field 에 Object 사용가능

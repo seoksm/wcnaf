@@ -1,0 +1,505 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.area-search {
+	border: none;
+	padding: 0;
+
+	&_wrap{
+		border: rem(3px) solid get(border, main);
+		background: get(background, main-light);
+		padding: calc(get(padding, large) * 2) calc(get(padding, xxxlarge) * 2);
+		border-radius: get(radius, default);
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		gap: get(margin, xlarge);
+
+		@include tabletLess{
+			justify-content: flex-end;
+			flex-wrap: wrap;
+			padding: calc(get(padding, large) * 2);
+
+			.wrap-input{
+				flex: 1;
+				width: 100%;
+
+				input, select{
+					max-width: 100%;
+				}
+			}
+		}
+		.btn-search{
+			flex: none;
+			padding: get(padding, small) get(padding, xxxlarge);
+		}
+		&.center{
+			justify-content: center;
+		}
+		&.board_search{
+			border-width: rem(2px);
+			justify-content: center;
+
+			.wrap-input{
+				gap: 0;
+
+				input{
+					border-top-right-radius: 0;
+					border-bottom-right-radius: 0;
+					height: get(btnsize, xlarge);
+				}
+				button{
+					border-top-left-radius: 0;
+					border-bottom-left-radius: 0;
+				}
+			}
+		}
+	}
+	&_form{
+		&:not(:first-child){
+			margin-top: get(content-margin, large);
+		}
+		&:not(:last-child){
+			margin-bottom: get(content-margin, large);
+		}
+	}
+	legend {
+		@include itemHidden;
+	}
+	.wrap-datepicker{
+		.datepicker{
+			flex: none;
+			max-width: 20rem;
+		
+			&.fixed_only {
+				position: relative;
+				display: block;
+				width: auto;
+				flex-shrink: 0;
+				padding: 0;
+				margin: 0;
+			
+				.ui-datepicker {
+					position: relative;
+					display: block;
+					width: 100%;
+					padding: 0;
+					background: get(background, transparent);
+					border-radius: 0;
+					border: none;
+					z-index: unset !important;
+			
+					&-header {
+						position: relative;
+						display: block;
+						color: get(text, black);
+						background: get(background, transparent);
+						border-radius: 0;
+			
+						.ui-datepicker {
+				
+							&-title {
+								position: relative;
+								display: block;
+								float: left;
+								margin: 0;
+								margin-right: get(margin, default);
+								font-size: get(title, xsmall);
+								@include font_weight(bold);
+								line-height: 1.4;
+							
+								select {
+									padding: 0 36px 0 0;
+									color: get(text, black);
+									border-radius: 0;
+									background: url('../img/ico_select.png') no-repeat center right;
+							
+									&:first-child {
+										border-right: 1px solid get(border, default);
+									}
+						
+									&:hover{
+										background-position-y: center;
+									}
+								}
+							}
+				
+							&-prev,
+							&-next {
+								position: relative;
+								display: inline-block;
+								top: auto;
+								left: auto;
+								right: auto;
+								width: get(btnsize, default);
+								height: get(btnsize, default);
+								margin-right: get(margin, default);
+								border-radius: 8px;
+								border: 1px solid get(border, default);
+				
+							span {
+								&::before {
+									border-right: 2px solid get(gray, 666);
+									border-bottom: 2px solid get(gray, 666);
+								}
+							}
+				
+							.ui-icon {
+								@include WH(get(ico, default));
+								margin-left: calc(get(ico, default) / -2);
+								margin-top: calc(get(ico, default) / -2);
+								border-radius: 3px;
+						
+								&:before {
+									width: 10px;
+									height: 10px;
+									box-sizing: border-box;
+								}
+							}
+							}
+				
+							&-prev {
+				
+								span:before {
+									right: 3px;
+									left: auto;
+								}
+							}
+				
+							&-next{
+				
+								span:before {
+									left: 3px;
+									right: auto;
+								}
+							}
+				
+							&-current{
+								position: relative;
+								display: inline-block !important;
+								top: auto;
+								left: auto;
+								right: auto;
+								height: 34px;
+								padding: 0 10px;
+								font-size: get(fontsize, default);
+								border-radius: 8px;
+								border: 1px solid get(border, default);
+							}
+						}
+					}
+			
+					&-calendar,
+					&-buttonpane {
+						display: none;
+					}
+				}
+			}
+		}
+	}
+
+	.search-wrap {
+		display: flex;
+		gap: 4px;
+		justify-content: space-between;
+
+		.search_inner{
+			flex: 1;
+			display: flex;
+			gap: get(margin, small) get(margin, xxlarge);
+			flex-wrap: wrap;
+			max-width: 100%;
+
+			> .box{
+				flex: 1;
+				display: flex;
+				align-items: center;
+				gap: get(margin, default);
+
+				.title{
+					padding-right: get(padding, default);
+					min-width: 100px;
+					text-align: left;
+
+					strong{
+						@include font_weight(normal);
+					}
+				}
+				.wrap-input{
+					width: 100%;
+
+					input[type=text]{
+						min-width: 120px;
+					}
+				}
+			}
+		}
+		> .btn-search{
+			flex: none;
+		}
+		select,
+		input[type="search"] {
+			//width: 120px !important;
+			min-width: 120px;
+		}
+
+		/* .wrap-input {
+			&:has(input.w-50p) {
+				width: 100%;
+
+				input {
+					width: 100% !important;
+				}
+			}
+		} */
+
+		@include tabletLess {
+			flex-wrap: wrap;
+
+			.wrap-input {
+
+				&#srchSeoOnly {
+
+					select {
+						margin-left: 0;
+					}
+
+					& + .wrap-input {
+						&:has(.wrap-datepicker) {
+							width: calc(100% - 120px - 4px);
+						}
+					}
+				}
+
+				&:has(.wrap-datepicker) {
+					width: 100%;
+				}
+			}
+
+			button#btnSearch {
+				margin-left: auto;
+			}
+		}
+
+		&:has(.wrap-input#srchSeoOnly) {
+			@include tabletLess {}
+		}
+
+		@include mobile {
+			flex-direction: unset;
+		}
+
+		/* @include mobileMore {
+
+			select,
+			input[class*=w-] {
+				width: 100% !important;
+			}
+		} */
+	}
+	
+	&.grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 12px 36px;
+		position: relative;
+		width: 100%;
+		//padding: 12px 140px 12px 24px;
+		padding: 12px 24px;
+		box-sizing: border-box;
+		
+		.button {
+			position: absolute;
+			bottom: 12px;
+			right: 24px;
+		}
+
+		.search-item {
+			display: flex;
+			flex-shrink: 0;
+			align-items: center;
+			flex-wrap: nowrap;
+			overflow: hidden;
+
+			label {
+				display: block;
+				margin-right: 24px;
+				@include font_weight(bold);
+				flex-shrink: 0;
+				color: get(text, sub1);
+			}
+
+			input,
+			select {
+				flex: 1;
+				width: 100%;
+			}
+
+			@include tablet {
+				label {
+					width: 120px;
+				}
+			}
+		
+			@include mobileMore {
+				display: block;
+				label {
+					margin-bottom: 4px;				
+				}
+
+				input, select {
+					width: 100%;
+				}
+			}
+		}
+
+		@include tabletMore {
+			grid-template-columns: 1fr 1fr;
+			padding: 8px 140px 8px 18px;
+			
+			.button {
+				bottom: 8px;
+			}
+		}
+		
+		@include tabletLess {
+			grid-template-columns: 1fr;
+			gap: 6px;
+			//padding: 8px 72px 8px 18px;
+		}
+	}
+	&.flex {
+		display: flex;
+		gap: 12px 36px;
+		position: relative;
+		width: 100%;
+		//padding: get(padding, xxxlarge);
+		box-sizing: border-box;
+		flex-wrap: wrap;
+
+		.button {
+			position: absolute;
+			bottom: 12px;
+			right: 24px;
+		}
+
+		.search-item {
+			display: flex;
+			flex-shrink: 0;
+			align-items: center;
+			flex-wrap: nowrap;
+			//overflow: hidden;
+			min-width: 0;
+			max-width: 100%;
+
+			> {
+				label, strong{
+					&:first-child{
+						display: block;
+						margin-right: 24px;
+						flex-shrink: 0;
+						//text-align: center;
+						min-width: 110px;
+						color: get(text, main);
+						@include font_weight;
+					}
+				}
+			}
+
+			input,
+			select {
+				flex: 1;
+				min-width: rem(100px);
+				max-width: rem(200px);
+				line-height: 1.2;
+			}
+
+			@include tabletLess{
+				input, select {
+					max-width: 100%;
+					width: 100%;
+				}
+			}
+			@include tablet {
+				label {
+					width: 120px;
+				}
+			}
+		
+			@include mobile {
+				display: block;
+				label {
+					margin-bottom: 4px;				
+				}
+
+				input, select {
+					width: 100%;
+				}
+			}
+		}
+
+		/* @include mobile {
+			padding: 8px 140px 8px 18px;
+			
+			.button {
+				bottom: 8px;
+			}
+		} */
+		
+		@include tabletLess {
+			//gap: 6px;
+			gap: get(content-margin, default);
+			//padding: 8px 72px 8px 18px;
+
+			.search-item{
+				width: 100%;
+			}
+			.wrap-datepicker .datepicker input{
+				min-width: 0;
+			}
+		}
+		@include mobile {
+			// padding: 8px 18px;
+
+			.search-item{
+				flex-direction: column;
+				align-items: flex-start;
+			}
+			.button{
+				position: relative;
+				top: auto;
+				left: auto;
+				bottom: auto;
+				right: auto;
+				width: 100%;
+
+				.btn-search{
+					width: 100%;
+					text-indent: 0;
+					text-align: center;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					gap: 4px;
+
+					&::before{
+						position: static;
+					}
+				}
+			}
+		}
+
+		&.full{
+			.search-item{
+				width: 100%;
+
+				.wrap-input{
+					width: 100%;
+				}
+				input, select{
+					width: 100%;
+					max-width: 100%;
+				}
+			}
+		}
+	}
+}

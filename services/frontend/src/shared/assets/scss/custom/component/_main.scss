@@ -1,0 +1,922 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.parallax_wrapper{
+	overflow: hidden;
+
+	#container.main-page{
+		max-height: calc(100vh - (rem(40px) + rem(1px)) - (rem(12px) + rem(16px) + rem(56px)));
+		overflow: hidden;
+
+		.parallax_wrap{
+			height: 100%;
+		}
+		.mainitem{
+			.item_align{
+				@include flex;
+				flex-direction: column;
+				min-height: calc(100vh - (rem(40px) + rem(1px)) - (rem(12px) + rem(16px) + 56px) - (get(content-margin, xxlarge) * 2));
+			}
+		}
+	}
+}
+
+#container.main-page{
+	overflow: visible;
+	color: get(text, default);
+	// overflow-y: auto;
+	// overflow-x: hidden;
+	flex: none;
+	
+	.scroll-down &{
+		max-height: 100vh;
+	}
+	.main_control_box{
+		position: fixed;
+		top: calc(rem(120px) + rem(80px));
+		right: rem(72px);
+		display: none;
+		
+		.flex_box{
+			@include flex;
+			flex-direction: column;
+			align-items: flex-end;
+			gap: rem(83px);
+
+			a{
+				position: relative;
+				@include flex;
+
+				&:not(:last-child){
+					&::before{
+						content: '';
+						position: absolute;
+						top: calc(100% - rem(1px));
+						right: rem(12px);
+						@include WH(rem(1px), rem(85px));
+						background-color: get(gray, bbb);
+					}
+				}
+				&::after{
+					content: '';
+					display: block;
+					@include WH(rem(24px));
+					margin-left: get(margin, default);
+					@include bgimg('main/ico-control_off.svg', contain);
+				}
+				&.active{
+					color: get(text, main);
+					
+					&::before{
+						background-color: get(background, main);
+					}
+					&::after{
+						@include bgimg('main/ico-control_on.svg', contain);
+					}
+				}
+			}
+		}
+		@media screen and (min-width: 1800px) and (min-height: 920.1px){
+			display: block;
+		}
+	}
+
+	.main-tit{
+		position: relative;
+		color: get(text, main);
+		font-size: get(title, default);
+
+		&::before{
+			content: '';
+			display: inline-block;
+			@include WH(rem(24px));
+			@include bgimg('main/ico_title.svg', contain);
+			margin-right: get(margin, xsmall);
+			transform: translateY(rem(3px));
+		}
+		
+		@media screen and (max-width: 1199px){
+			font-size: get(fontsize, xxlarge);
+		}
+	}
+	.title_main{
+		position: relative;
+		text-align: center;
+
+		h2{
+			color: get(text, main);
+			font-size: rem(42px);
+			@include font_weight(SemiBold);
+			line-height: 1.2;
+		}
+		p{
+			font-size: get(fontsize, xxlarge);
+		}
+		@media screen and (max-width: 1199px){
+			h2{
+				font-size: rem(36px);
+			}
+			P{
+				font-size: get(fontsize, large);
+			}
+		}
+		@media screen and (max-width: 760px){
+			h2{
+				font-size: rem(26px);
+				@include font_weight;
+			}
+			P{
+				font-size: get(fontsize, default);
+				line-height: 1.4;
+				margin-top: get(margin, large);
+			}
+		}
+	}
+
+	.list{
+		&-water_quality{
+			ul{
+				display: flex;
+				flex-direction: column;
+				gap: get(content-margin, default);
+
+				li{
+					display: flex;
+					align-items: center;
+					gap: get(margin, default);
+
+					strong{
+						flex: none;
+						@include flex;
+						@include WH(rem(100px), rem(36px));
+						border-radius: rem(50px);
+						color: get(text, main);
+						font-size: get(fontsize, large);
+						@include font_weight(SemiBold);
+						border: rem(1px) solid get(border, main);
+					}
+				}
+			}
+		}
+		&-main_tel{
+			border-top: rem(1px) solid get(border, default);
+			//padding: get(padding, default) 0;
+			margin-top: get(content-margin, default);
+			flex: 1;
+			container: cont-main_tel / size;
+			min-height: rem(240px);
+
+			.scroll_box{
+				max-height: 100cqh;
+				overflow-y: auto;
+				overflow-x: hidden;
+				min-height: 100%;
+			}
+			.tel_item{
+				h3{
+					@include flex;
+					border-radius: rem(50px);
+					color: get(text, white);
+					@include bgimg('main/pattern_type1.svg', contain, repeat-x, $color: get(background, main));
+					height: rem(52px);
+				}
+				li{
+					font-size: get(fontsize, xlarge);
+					padding: get(padding, default);
+					
+					strong{
+						display: block;
+						color: get(text, main);
+						@include font_weight(SemiBold);
+					}
+					p{
+						@include font_weight(Light);
+					}
+					&:not(:last-child){
+						border-bottom: rem(1px) solid get(border, default);
+					}
+				}
+			}
+		}
+		&-notice{
+			margin-top: get(content-margin, xxlarge);
+
+			li{
+				border-bottom: rem(1px) solid get(border, default);
+
+				&:first-child{
+					border-top: rem(1px) solid get(border, default);
+				}
+				a{
+					display: flex;
+					justify-content: space-between;
+					flex-wrap: wrap;
+					padding: rem(21px) get(content-margin, default);
+					font-size: get(fontsize, large);
+
+					p{
+						flex: 1;
+						@include text_ellipsis;
+					}
+					&:hover, &:focus{
+						text-decoration: underline;
+					}
+				}
+			}
+		}
+		&-tel{
+			border-top: rem(1px) solid get(border, default);
+			margin-top: get(content-margin, xlarge);
+			padding: get(content-margin, xlarge) 0;
+
+			ul{
+				display: flex;
+				flex-direction: column;
+				gap: get(content-margin, default);
+
+				li{
+					font-size: get(fontsize, xxlarge);
+					@include font_weight(Light);
+
+					@media screen and (max-height: 1000px){
+						font-size: get(fontsize, large);
+					}
+				}
+			}
+		}
+		@media screen and (max-height: 1050px), (max-width: 1300px){
+			&-water_quality{
+				ul{
+					gap: get(content-margin, small);
+
+					li{
+						strong{
+							@include WH(rem(100px), rem(30px));
+							font-size: get(fontsize, small);
+						}
+					}
+				}
+			}
+			&-main_tel{
+				.tel_item{
+					li{
+						font-size: get(fontsize, default);
+					}
+				}
+			}
+			&-notice{
+				li{
+					a{
+						padding: get(content-margin, default);
+						font-size: get(fontsize, default);
+					}
+				}
+			}
+			&-tel{
+				margin-top: get(content-margin, default);
+				padding: get(content-margin, default) 0;
+			}
+		}
+		@media screen and (max-width: 1199px){
+			&-main_tel{
+				container: none;
+
+				.scroll_box{
+					max-height: rem(300px);
+				}
+			}
+			&-notice{
+				margin-top: get(content-margin, default);
+			}
+			&-tel{
+				ul{
+					li{
+						font-size: get(fontsize, large);
+					}
+				}
+			}
+		}
+	}
+
+	.slider_box:not(:has(.popup_wrap)){
+		position: relative;
+		padding: 0 rem(70px);
+
+		.quick_wrap{
+			position: static;
+			text-align: center;
+		}
+		.swiper-slide{
+			a{
+				@include flex;
+				margin-bottom: get(content-margin, default);
+				border: rem(1px) solid get(border, main);
+				border-radius: rem(184px);
+				padding: 0 get(padding, xsmall);
+				text-align: center;
+				margin: 0 rem(1px);
+
+				span{
+					display: block;
+					line-height: 1.2;
+					color: get(text, main);
+					@include font_weight(SemiBold);
+				}
+				> span{
+					margin-top: get(margin, default);
+				}
+
+				@media screen and (max-width: 1199px){
+					border-radius: rem(20px);
+				}
+			}
+		}
+		.control_box{
+			button{
+				position: absolute;
+				top: calc(50% - rem(56px));
+				@include flex;
+				border-radius: get(radius, xxxlarge);
+				border: rem(1px) solid get(border, main);
+				@include WH(rem(40px), rem(80px));
+				display: block !important;
+
+				&.btn_prev{
+					left: 0;
+				}
+				&.btn_next{
+					right: 0;
+				}
+				&.disabled, &[disabled]{
+					background-color: rgba(get(background, black), 0.2);
+					opacity: 0.5;
+					pointer-events: none;
+				}
+			}
+			.slider_pagination{
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				@include WH(auto, rem(32px));
+				text-align: center;
+				border-radius: rem(50px);
+				background-color: get(background, main);
+				padding: 0 get(content-margin, default);
+				@include font_weight(Medium);
+				color: get(text, white);
+
+				.swiper-pagination{
+					&-current{
+						margin-right: get(margin, xsmall);
+					}
+					&-total{
+						margin-left: get(margin, xsmall);
+					}
+				}
+			}
+		}
+	}
+
+	.mainitem{
+		padding: get(content-margin, xxlarge);
+		
+		@media screen and (max-width: 1199px){
+			padding: get(content-margin, large) 0;
+		}
+		.flex_box{
+			width: 100%;
+		}
+		&1{
+			.flex_box{
+				display: flex;
+				gap: get(content-margin, xxlarge);
+
+				.left_box{
+					flex: 1;
+					display: flex;
+					flex-direction: column;
+					min-width: 0;
+				}
+				.right_box{
+					//flex: calc(360 * 100 / 1400);
+					display: flex;
+					flex-direction: column;
+					gap: get(content-margin, xlarge);
+
+					@media screen and (min-width: 350px){
+						min-width: rem(350px);
+					}
+					> div{
+						padding-top: get(content-margin, large);
+						border-top: 1px solid get(border, default);
+
+						&:last-child{
+							flex: 1;
+							@include flex_col;
+						}
+					}
+				}
+			}
+			.slider_box{
+				max-width: rem(1000px);
+				//flex: 1;
+				width: 100%;
+
+				.swiper-wrapper{
+					align-items: center;
+				}
+			}
+			.popup_wrap{
+				text-align: center;
+				//background-color: #f5f5f5;
+				//height: 100%;
+
+				.swiper-slide{
+					background-color: #f5f5f5;
+					a{
+						@include flex;
+						background-color: #f5f5f5;
+
+						&:has(img[onerror]){
+							background-color: #f5f5f5;
+							@include flex;
+							height: 100%;
+						}
+						img{
+							max-height: 320px;
+							min-height: 212px;
+						}
+					}
+				}
+				.control_box{
+					@include flex;
+					padding-top: get(content-margin, default);
+					padding-bottom: get(padding, xsmall);
+					gap: get(margin, default);
+					background-color: get(background, white);
+
+					button{
+						@include flex;
+						border: 1px solid get(border, default);
+						border-radius: 50%;
+						@include WH(get(ico, xlarge));
+						display: inline-flex;
+					}
+					.slider_pagination{
+						display: inline-flex;
+						border: 1px solid get(border, default);
+						border-radius: rem(50px);
+						padding: 0 get(content-margin, default);
+						@include font_weight(Medium);
+						width: auto;
+
+						.swiper-pagination{
+							&-current{
+								margin-right: get(margin, xsmall);
+								color: get(text, main);
+							}
+							&-total{
+								margin-left: get(margin, xsmall);
+							}
+						}
+					}
+				}
+			}
+			.main_search_box{
+				text-align: center;
+				margin-top: get(content-margin, xlarge);
+				flex: 1;
+				@include flex;
+				
+				p{
+					font-size: get(fontsize, xxlarge);
+					@include font_weight(Light);
+				}
+				.search_input_box{
+					max-width: rem(800px);
+					margin: 0 auto;
+
+					.input_box_item{
+						margin-top: get(content-margin, default);
+						@include flex_row;
+						align-items: center;
+						gap: get(margin, xsmall) get(content-margin, large);
+
+						strong{
+							flex: none;
+							display: block;
+							font-size: rem(34px);
+							@include font_weight(SemiBold);
+						}
+						.wrap-input{
+							gap: get(margin, small) get(margin, xxlarge);
+							justify-content: center;
+							flex: 1;
+		
+							.item{
+								position: relative;
+								flex: 1;
+		
+								&::after{
+									content: '';
+									@include absolute_blr;
+									height: rem(2px);
+									background-color: get(gray, 666);
+								}
+								input[type=text]{
+									display: block;
+									border: 0;
+									@include WH(100%, rem(100px));
+									//max-width: rem(50px);
+									margin: 0;
+									padding: 0;
+									text-align: center;
+									font-size: rem(80px);
+									color: get(gray, 666);
+								}
+		
+								&:nth-child(n):nth-child(-n+4){
+									&::after{
+										content: '';
+										@include absolute_blr;
+										height: rem(2px);
+										background-color: get(background, main);
+									}
+									input[type=text]{
+										color: get(text, main);
+									}
+								}
+							}
+						}
+						&:not(:first-child){
+							margin-top: get(content-margin, large);
+	
+							input[type=text]{
+								display: block;
+								text-align: center;
+								@include WH(100%, rem(56px));
+								border-radius: get(radius, default);
+							}
+						}
+						&:last-child{
+							input[type=text]{
+								//@include activeColor(rgba(get(background, main), 0.2));
+								background-color: get(background, white);
+								border: rem(1px) solid get(border, main);
+								color: get(text, default);
+								font-size: get(title, large);
+								height: rem(66px);
+								letter-spacing: rem(10px);
+								@include font_weight(SemiBold);
+	
+								&::placeholder{
+									letter-spacing: 0;
+									color: get(text, light);
+									@include font_weight(Regular);
+								}
+								&:hover, &:focus{
+									outline: rem(2px) solid get(border, main);
+								}
+							}
+						}
+					}
+				}
+
+				.btn_box{
+					display: flex;
+					gap: get(content-margin, large);
+					margin-top: get(content-margin, xlarge);
+					flex-wrap: wrap;
+					white-space: nowrap;
+
+					button{
+						flex: 1;
+						@include flex;
+						text-align: center;
+						border: 1px solid get(border, default);
+						border-radius: get(radius, xlarge);
+						height: rem(92px);
+						font-size: rem(30px);
+
+						i{
+							margin-right: get(margin, xsmall);
+						}
+						&.btn_search{
+							border-color: get(border, main);
+							color: get(text, main);
+
+							i{
+								@include ico_color(main);
+							}
+						}
+					}
+				}
+			}
+
+			.tab_box{
+				margin-top: get(margin, xlarge);
+
+				.tab.fill.full{
+					> ul{
+						> li{
+							.btn-tab{
+								background-color: get(background, white);
+								height: rem(46px);
+								border-color: get(gray, ddd);
+								@include font_weight(Medium);
+							}
+							&.active{
+								.btn-tab{
+									background-color: get(background, main);
+									color: get(text,white);
+									border-color: get(border, main) !important;
+									@include font_weight(SemiBold);
+								}
+							}
+						}
+					}
+				}
+			}
+			@media screen and (max-height: 1050px), (max-width: 1300px){
+				.main_search_box{
+					.search_input_box{
+						.input_box_item{
+							strong{
+								font-size: 24px;
+							}
+							.wrap-input{
+								.item{
+									input[type=text]{
+										font-size: rem(50px);
+										//@include WH(rem(40px), rem(80px));
+										height: rem(80px);
+										@include font_weight(Medium);
+									}
+								}
+							}
+							&:last-child{
+								input[type=text]{
+									font-size: get(title, default);
+								}
+							}
+						}
+					}
+					.btn_box{
+						gap: get(content-margin, small);
+
+						button{
+							height: rem(70px);
+							font-size: rem(24px);
+						}
+					}
+				}
+				.tab_box{
+					.krds-tab-area{
+						gap: get(content-margin, default);
+					}
+				}
+			}
+			@media screen and (max-width: 1199px){
+				.flex_box{
+					flex-direction: column;
+				}
+			}
+			@media screen and (max-width: 650px){
+				.main_search_box{
+					.btn_box{
+						button{
+							height: rem(60px);
+							font-size: get(fontsize, large);
+		
+							i{
+								transform: scale(0.7);
+							}
+						}
+					}
+				}
+			}
+			@media screen and (max-width: 600px){
+				.main_search_box{
+					.search_input_box{
+						.input_box_item{
+							flex-direction: column;
+							align-items: flex-start;
+							
+							strong{
+								font-size: 24px;
+							}
+							.wrap-input{
+								width: 100%;
+								gap: get(margin, small) 2%;
+		
+								.item{
+									input[type=text]{
+										font-size: rem(50px);
+										//@include WH(rem(30px), rem(70px));
+										height: rem(70px);
+									}
+								}
+							}
+							&:not(:first-child){
+								margin-top: get(content-margin, xlarge);
+							}
+							&:last-child{
+								input[type=text]{
+									font-size: get(fontsize, xlarge);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		&2{
+			.slider_box{
+				margin-top: get(content-margin, xlarge);
+				
+				.swiper-wrapper{
+					&.center{
+						justify-content: center;
+
+						.swiper-slide{
+							flex: 1;
+
+							a{
+								border-radius: rem(40px);
+							}
+						}
+					}
+				}
+				.swiper-slide{
+					a{
+						flex-direction: column;
+						height: rem(184px);
+
+						img{
+							height: rem(56px);
+						}
+						@media screen and (max-width: 1199px){
+							height: rem(140px);
+
+							i{
+								transform: scale(0.8);
+							}
+						}
+						@media screen and (max-height: 1000px){
+							height: rem(140px);
+							font-size: get(fontsize, small);
+
+							img{
+								height: rem(60px);
+							}
+						}
+						@media screen and (max-width: 1023px){
+							img{
+								height: rem(60px);
+							}
+						}
+					}
+				}
+				&:has(.center){
+					padding: 0;
+				}
+			}
+			.bottom_box{
+				display: flex;
+				gap: get(content-margin, xxlarge);
+				margin-top: get(content-margin, xxlarge);
+
+				@media screen and (max-width: 870px){
+					flex-direction: column;
+				}
+			}
+			.notice_box{
+				position: relative;
+				flex: 1;
+				border-top: 1px solid get(border, default);
+				padding-top: get(content-margin, xxlarge);
+
+				.more{
+					@include absolute_tr(get(content-margin, xxlarge), 0);
+				}
+			}
+			.etc_box{
+				border-bottom: rem(1px) solid get(border, default);
+
+				.btn_box{
+					display: flex;
+					flex-direction: column;
+					gap: get(content-margin, large);
+
+					a{
+						@include flex;
+						border-radius: 50px 0;
+						background-image: linear-gradient(to right, get(background, main), get(background, sub2));
+						color: get(text, white);
+						height: rem(60px);
+						font-size: get(title, default);
+						@include font_weight(Medium);
+					}
+					@media screen and (max-height: 1050px), (max-width: 1300px){
+						gap: get(content-margin, default);
+
+						a{
+							font-size: get(fontsize, xlarge);
+						}
+					}
+					@media screen and (max-width: 760px){
+						a{
+							height: rem(50px);
+						}
+					}
+				}
+				.tel_box{
+					border-top: rem(1px) solid get(border, default);
+					padding-top: get(content-margin, xlarge);
+					margin-top: get(content-margin, xlarge);
+				}
+			}
+		}
+		&3{
+			.slider_box{
+				margin-top: rem(64px);
+				//height: calc((rem(200px) * 3) + (16px * 2));
+				
+				.quick_wrap{
+					height: auto !important;
+    				//min-height: calc((rem(130px) + 16px) * 3); /* 슬라이드 높이 100px 가정 시 */
+				}
+				.swiper-slide{
+					display: grid;
+					gap: rem(16px);
+
+					@for $i from 1 through 3 {
+						@for $j from 1 through 3 {
+							&[data-slide="#{$i}_#{$j}"]{
+								grid-template-columns: repeat($i, 1fr);
+								grid-template-rows: repeat($j, 1fr);
+							}
+						}
+					}
+				}
+				.slide_item{
+					//width: 100% !important;
+					//height: auto !important;
+					//height: calc((100% - 30px) / 5) !important;
+					min-height: rem(130px);
+
+					a{
+						height: rem(130px);
+						padding: 0 rem(64px);
+						font-size: get(fontsize, xxxlarge);
+						@include font_weight(SemiBold);
+
+						img{
+							height: rem(80px);
+						}
+						span{
+							flex: 1;
+							text-align: right;
+						}
+
+						@media screen and (max-height: 1000px){
+							height: rem(120px);
+							font-size: get(fontsize, xlarge);
+						}
+						@media screen and (max-width: 1199px){
+							flex-direction: column;
+							font-size: get(fontsize, default);
+
+							i{
+								transform: scale(0.8);
+							}
+							span{
+								text-align: center;
+							}
+						}
+
+						@media screen and (max-width: 1198px){
+							padding: 0 get(padding, xsmall);
+							height: 100%;
+
+							img{
+								height: rem(60px);
+							}
+							span{
+								flex: none;
+								font-size: get(fontsize, small);
+							}
+						}
+					}
+				}
+
+				@media screen and (max-width: 1198px){
+					margin-top: rem(40px);
+				}
+			}
+		}
+		&4{
+			padding: 0;
+		}
+	}
+
+}

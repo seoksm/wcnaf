@@ -1,0 +1,155 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: platform-ingress
+  annotations:
+      external-dns.alpha.kubernetes.io/hostname: dev-portal.cloud-winitech.com
+      external-dns.alpha.kubernetes.io/ttl: "60"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'false'
+      nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+spec:
+  # ingressClassName: alb
+  ingressClassName: dev-wini-dev-portal-nginx
+  # tls:
+  #   - hosts:
+  #       - "dev-portal.cloud-winitech.com"
+  #     secretName: portal-cloud-winitech-tls
+  rules:
+    - host: dev-portal.cloud-winitech.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: service-frontend
+                port:
+                  number: 8080
+          # - path: /api/v1/collection
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: service-collection
+          #       port:
+          #         number: 8092
+          # - path: /api/v1/master-info
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: service-master-info
+          #       port:
+          #         number: 8092
+          - path: /api/v1/system
+            pathType: Prefix
+            backend:
+              service:
+                name: service-system
+                port:
+                  number: 8092
+          - path: /api/v1/code-qna
+            pathType: Prefix
+            backend:
+              service:
+                name: service-code-qna
+                port:
+                  number: 8092
+          - path: /api/v1/docs
+            pathType: Prefix
+            backend:
+              service:
+                name: service-docs
+                port:
+                  number: 8092
+          - path: /api/v1/common
+            pathType: Prefix
+            backend:
+              service:
+                name: service-system
+                port:
+                  number: 8092
+          - path: /api/v1/comment
+            pathType: Prefix
+            backend:
+              service:
+                name: service-comment
+                port:
+                  number: 8092
+          - path: /api/v1/code-play
+            pathType: Prefix
+            backend:
+              service:
+                name: service-code-play
+                port:
+                  number: 8092
+          - path: /api/v1/tech-blog
+            pathType: Prefix
+            backend:
+              service:
+                name: service-tech-blog
+                port:
+                  number: 8092
+          - path: /api/v1/project
+            pathType: Prefix
+            backend:
+              service:
+                name: service-project
+                port:
+                  number: 8092
+          - path: /api/v1/api-gateway
+            pathType: Prefix
+            backend:
+              service:
+                name: service-api-gateway
+                port:
+                  number: 8092
+          # - path: /api/v1/sms
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: service-collection-extra
+          #       port:
+          #         number: 8092
+          # - path: /api/v1/waterLevelImageAnalyser/analyse
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: service-waterlevel-image-analyse-engine
+          #       port:
+          #         number: 9080
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: platform-ingress-api-gateway
+  annotations:
+      external-dns.alpha.kubernetes.io/hostname: dev-portal-apigw.cloud-winitech.com
+      external-dns.alpha.kubernetes.io/ttl: "60"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'false'
+      nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+spec:
+  # ingressClassName: alb
+  ingressClassName: dev-wini-dev-portal-nginx
+  # tls:
+  #   - hosts:
+  #       - "dev-portal-apigw.cloud-winitech.com"
+  #     secretName: portal-cloud-winitech-tls
+  rules:
+    - host: dev-portal-apigw.cloud-winitech.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: service-frontend
+                port:
+                  number: 8080
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: service-api-gateway
+                port:
+                  number: 8092

@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/collection
+  newTag: 300f2bf3b98592731237d9283dc5e2c212e9cf6d
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/collection
+  newTag: 8f5fb92fe2055b3ea1eb0cf245ad4cad98e59bf3
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/collection-extra
+  newTag: f4f5ba2c9298c97f1d95283b9332e7357cf5a489
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/frontend
+  newTag: f518d91f9edd7ef0e6e05a56e5d9173e6d848e4d
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/master-info
+  newTag: 02d990298ed6c98c3d06981026a5ecb0ee252d45
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/system
+  newTag: 4ced51892c9bdb72f6d3ce2baa66827352b9d97f
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/waterlevel-image-analyse
+  newTag: e3585ca8ac4d64878d722b12b4fcd5b5f60a4b6c
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/flood-and-facility/waterlevel-image-analyse-engine
+  newTag: 46bc1bd424849ab5104276c23f197402153f8059
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/master-info
+  newTag: 5e5c9d2a32aea2527a3daa3ff0c5495f392fcb33
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/system
+  newTag: 5c5a524381a6dca1fe707425ced115c4200e8164
+- name: 471112892144.dkr.ecr.ap-southeast-1.amazonaws.com/waterlevel-image-analyse
+  newTag: 68c8aab3f4cd672a4a2b7fa4d40a4fe3c47501de
+- name: gitlab-registry.cloud-winitech.com/cto/wcnaf/api-gateway
+  newName: gitlab-registry.cloud-winitech.com/cto/wcnaf/api-gateway
+  newTag: develop-c0cbf5272db8734100569ac1e2dffede9c509916
+- name: gitlab-registry.cloud-winitech.com/cto/wcnaf/system
+  newName: gitlab-registry.cloud-winitech.com/cto/wcnaf/system
+  newTag: develop-56a4498acd6c090e71fd6c2059a4cf8d163f941d
+- name: registry.cloud-winitech.com/win-dev-portal_api-gateway
+  newTag: 4d7ad0d18cd35524e7b5b2e4b00dca55be455d85
+- name: registry.cloud-winitech.com/win-dev-portal_code-play
+  newTag: 8becd38ad06217d03b8ad08889407f65c5128ed3
+- name: registry.cloud-winitech.com/win-dev-portal_code-qna
+  newTag: d4026512fdcb678aac53219725ab645d4dd6d17d
+- name: registry.cloud-winitech.com/win-dev-portal_comment
+  newTag: 61411c221f0f12a658cb3472ec94bd06e750b80a
+- name: registry.cloud-winitech.com/win-dev-portal_docs
+  newTag: f1fa4d0c826379b20156fa6a02cd711e9ea481fd
+- name: registry.cloud-winitech.com/win-dev-portal_frontend
+  newTag: f855d2ef86a8ebdfc02cdc744242d3ee738db18e
+- name: registry.cloud-winitech.com/win-dev-portal_project
+  newTag: e0e236a59217a2cde9620d9f3206e3b4a0e31d98
+- name: registry.cloud-winitech.com/win-dev-portal_system
+  newTag: e5c1973f545ec5ab2da13b4e274ff9bbcb8c862a
+- name: registry.cloud-winitech.com/win-dev-portal_tech-blog
+  newTag: d4026512fdcb678aac53219725ab645d4dd6d17d
+- name: registry.cloud-winitech.com/wini-dev-portal_api-gateway
+  newTag: 13c9d68576031927276f60c4e4e3bfdc3e4496f7
+  
+resources:
+- ../../base

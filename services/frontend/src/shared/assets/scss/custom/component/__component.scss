@@ -1,0 +1,62 @@
+//@use "../common/includes/includes" as *;
+//@forward "include";
+
+//@forward "button";
+//@forward "button";
+
+//only component
+
+//공통
+//@import "../common/include";
+
+//component
+@forward "fonts";
+@forward "reset";
+@forward "button";
+@forward "icon";
+@forward "tab";
+@forward "table";
+@forward "text_list";
+@forward "modal";
+@forward "help_panel";
+@forward "accordion";
+@forward "spinner";
+@forward "contextual_help";
+@forward "tooltip";
+@forward "file_upload";
+@forward "coach_mark";
+@forward "disclosure";
+@forward "skip_link";
+@forward "masthead";
+@forward "header";
+@forward "main_menu";
+@forward "footer";
+@forward "site";
+@forward "identifier";
+@forward "side_navigation";
+@forward "structured_list";
+@forward "critical_alerts";
+@forward "in_page_navigation";
+@forward "carousel";
+@forward "pagination";
+@forward "breadcrumb";
+@forward "step_indicator";
+@forward "badge";
+@forward "tag";
+@forward "form_layout";
+@forward "input";
+@forward "select";
+@forward "form_check";
+@forward "form_chip";
+@forward "switch";
+@forward "calendar";
+@forward "p_common";
+@forward "p_layout";
+@forward "resize";
+@forward "language_switcher";
+@forward "form";
+@forward "search";
+@forward "datepicker";
+@forward "toast";
+@forward "item";
+@forward "main";

@@ -1,0 +1,59 @@
+@use "variables" as *;
+@use "colors" as *;
+@use "functions" as *;
+
+$breakpoints: (
+	mobile: 480px,
+	mobileLarge: 600px,
+	tablet: 767px,
+	tabletLarge: 1024px,
+	desktop: 1300px,
+	desktopLarge: 1600px,
+);
+
+// ▶ min-width 이상
+@mixin media-up($key) {
+	$value: map-get($breakpoints, $key);
+	@if $value {
+		@media (min-width: $value) {
+		@content;
+		}
+	} @else {
+		@warn "⚠️ Breakpoint `#{$key}` is not defined.";
+	}
+}
+
+// ▶ max-width 이하
+@mixin media-down($key) {
+	$value: map-get($breakpoints, $key);
+	@if $value {
+		@media (max-width: $value) {
+		@content;
+		}
+	} @else {
+		@warn "⚠️ Breakpoint `#{$key}` is not defined.";
+	}
+}
+
+// ▶ 구간 (min ~ max)
+@mixin media-between($min-key, $max-key) {
+	$min: map-get($breakpoints, $min-key);
+	$max: map-get($breakpoints, $max-key);
+	@if $min and $max {
+		@media (min-width: $min) and (max-width: $max) {
+		@content;
+		}
+	} @else {
+		@warn "⚠️ Breakpoint `#{$min-key}` or `#{$max-key}` is not defined.";
+	}
+}
+
+
+@mixin mobile       { @include media-down(mobileLarge) { @content; }  } //600px 이하
+@mixin mobileMore   { @include media-up(mobileLarge) { @content; }  } //600px 이상
+@mixin tablet       { @include media-between(mobileLarge, tabletLarge) { @content; }  } //600px이상 ~ 1024px 이하
+@mixin tabletLess   { @include media-down(tablet) { @content; }  } //768px 이하
+@mixin tabletMore   { @include media-up(tabletLarge) { @content; }  } //1024px 이상
+@mixin desktopLess  { @include media-down(desktop) { @content; }  } //1300px 이하
+@mixin desktop      { @include media-up(desktop) { @content; }  } //1300px 이상
+@mixin desktopLarge { @include media-up(desktopLarge) { @content; }  } //1600px 이상

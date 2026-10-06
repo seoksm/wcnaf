@@ -1,0 +1,59 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.krds-main-menu{
+	position: static;
+
+	.gnb-toggle-wrap{
+		margin-top: 0;
+		border-top: rem(1px) solid get(border, default);
+
+		.gnb-main-list .gnb-sub-trigger{
+			&.selected{
+				//background-color: get(background, white);
+				color: get(text, main);
+				@include font_weight;
+			}
+		}
+		.gnb-sub-list .gnb-sub-content > ul{
+			a, button{
+				&.selected{
+					background-color: get(background, light);
+					color: get(text, sub1);
+					@include font_weight;
+				}
+			}
+		}
+	}
+
+	&-mobile{
+		.gnb-wrap{
+			.gnb-header{
+				height: 64px;
+			}
+			.gnb-body .gnb-menu{
+				.menu-wrap{
+					width: rem(160px);
+
+					.gnb-main-trigger{
+						&.selected{
+							background-color: get(background, white);
+							color: get(text, main);
+							@include font_weight;
+						}
+					}
+				}
+				.submenu-wrap .depth4-wrap .depth4-body .depth4-ul a{
+					&.selected{
+						background-color: get(background, light);
+						color: get(text, sub1);
+						@include font_weight;
+					}
+				}
+			}
+			@media screen and (min-width: 768px) and (max-width: 1023px){
+				width: 60%;
+
+			}
+		}
+	}
+}

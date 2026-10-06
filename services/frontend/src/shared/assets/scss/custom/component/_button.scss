@@ -1,0 +1,278 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.btn-comm {
+    position: relative;
+    display: inline-block;
+    //min-width: 80px;
+    min-width: get(btnsize, xlarge);
+    min-height: get(btnsize, xlarge);
+    padding: get(padding, small) get(padding, xxlarge);
+    text-align: center;
+    color: get(text, white);
+    @include font_weight(normal);
+    @include activeColor ($bgColor: get(button, main), $borderColor: get(border, main));
+    word-break: keep-all;
+    box-sizing: border-box;
+    text-decoration: none;
+    cursor: pointer;
+	line-height: calc(get(btnsize, xlarge) - (get(padding, small) * 2));
+	border-radius: get(radius, xsmall);
+	font-size: get(fontsize, default);
+
+    &.large {
+		min-height: get(btnsize, xxxlarge);
+		line-height: calc(get(btnsize, xxxlarge) - (get(padding, large) * 2));
+		padding: get(padding, xlarge) get(padding, xxlarge);
+		font-size: get(fontsize, large);
+	}
+
+	&.type-main,
+	&.type-submit {
+		@include activeColor(get(background, main));
+		color: get(text, white);
+	}
+
+	&.type-sub {
+		@include activeColor(get(button, sub));
+		color: get(text, white);
+	}
+
+	&.type-sub1 {
+		@include activeColor(get(button, sub1));
+		color: get(text, white);
+	}
+
+	&.type-white {
+		@include activeColor(get(background, white));
+		color: get(text, main);
+	}
+
+	&.type-gray,
+	&.type-cancel {
+		@include activeColor(get(gray, 666));
+		color: get(text, white);
+	}
+
+	&.type-light-gray {
+		@include activeColor(get(gray, eee));
+		color: get(text, default);
+	}
+
+	&.type-warn,
+	&.type-del {
+		@include activeColor(get(button, warn));
+		color: get(text, white);
+	}
+
+	&.type-transparent {
+		@include activeColor(get(base, transparent));
+		color: get(text, default);
+	}
+
+	&.type-line {
+		border: 1px solid get(button, main);
+		@include activeColor(get(background, white), get(button, main));
+		color: get(text, main);
+
+		&:disabled {
+		color: get(gray, eee);
+		border: none;
+		}
+
+		&-warn {
+		@include activeColor(get(background, white), get(button, warn));
+		border: 1px solid get(button, warn);
+		color: get(text, warn);
+
+		&:disabled {
+			// background-color: $gray-300 !important;
+			// border-color: $co-border-default;
+			border: none;
+		}
+		}
+
+		&-sub1 {
+		border: 1px solid get(border, sub1);
+		@include activeColor(get(background, white), get(border, sub1));
+		color: get(text, sub1);
+		}
+		&-sub2 {
+		border: 1px solid get(border, sub2);
+		@include activeColor(get(background, white), get(border, sub2));
+		color: get(text, sub2);
+		}
+
+		&-dark {
+		border: 1px solid get(border, dark);
+		@include activeColor(get(background, white), get(border, dark));
+		color: get(text, darken);
+		}
+
+		&-gray {
+		@include activeColor(get(background, white), get(border, default));
+		border: 1px solid get(border, default);
+		color: get(text, default);
+		}
+
+		&-excel {
+		@include activeColor(get(background, white), get(type, excel));
+		border: 1px solid get(type, excel);
+		color: get(type, excel);
+		}
+	}
+
+	&.s_small {
+		min-width: 80px;
+		height: get(btnsize, default);
+		font-size: get(fontsize, default);
+	}
+
+	&:disabled {
+		color: get(gray, eee);
+		background-color: get(gray, 999) !important;
+		outline: none !important;
+		cursor: default !important;
+		pointer-events: none;
+
+		&:focus,
+		&:hover,
+		&.active {
+		background-color: get(gray, 999) !important;
+		outline: none !important;
+		}
+	}
+
+	.list_box &{
+		height: get(btnsize, default);
+	}
+}
+.btn-ico {
+    @extend .btn-comm;
+}
+
+.btn-link{
+	font-size: get(fontsize, default);
+	color: get(text, main);
+	padding: 0;
+	@include font_weight;
+
+	&:hover, &:focus{
+		color: get(text, point);
+	}
+	&.type-line{
+		border: 1px solid get(button, main);
+		@include activeColor(get(background, white), get(button, main));
+		padding: get(padding, xsmall) get(padding, large);
+		border-radius: get(radius, xsmall);
+	}
+}
+
+
+  .btn-paging {
+    display: inline-block;
+    min-width: get(btnsize, xlarge);
+    height: get(btnsize, xlarge);
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+
+    @include activeColor ($bgColor: get(background, white), $borderColor: get(border, main));
+
+    @include mobileMore {
+      min-width: get(form, xsmall); //$form-h-xsmall;
+      height: get(form, xsmall); //$form-h-xsmall;
+      padding: 6px;
+      font-size: 14px;
+      //line-height: calc($form-h-xsmall - 12px);
+      line-height: calc(get(form, xsmall) - 12px);
+    }
+
+    &.first,
+    &.prev,
+    &.next,
+    &.last {
+      position: relative;
+      width: get(btnsize, xlarge);
+      //text-indent: -999px;
+      text-align: left;
+      overflow: hidden;
+
+      &[disabled] {
+        pointer-events: none;
+
+        i::before {
+          opacity: .4;
+        }
+      }
+
+      @include mobileMore {
+        width: get(form, xsmall); //$form-h-xsmall;
+        padding: 4px;
+      }
+    }
+
+    &.active {
+		@include font_weight(bold);
+		@include activeColor ($bgColor: get(background, main), $borderColor: get(border, main));
+		color: #fff;
+    }
+  }
+
+
+.area-btn {
+	margin-top: get(margin, xlarge);
+	text-align: right;
+	display: flex;
+	flex-wrap: wrap;
+	text-align: center;
+	font-size: 0;
+	justify-content: right;
+	gap: get(margin, small);
+
+	.list_box &{
+		justify-content: left;
+		margin-top: get(margin, default);
+	}
+	>* {
+		font-size: get(fontsize, default);
+	}
+
+	.sub {
+		float: left;
+	}
+
+	&.paging,
+	&.center {
+		text-align: center;
+		justify-content: center;
+		margin-top: get(content-margin, large);
+	}
+
+	.area-board-cert & {
+		padding: 0 24px;
+	}
+
+	&.full {
+		@include flex(col);
+		gap: get(margin, small);
+		margin-bottom: 0 !important;
+
+		>button {
+			margin-left: 0;
+			margin-bottom: 0 !important;
+		}
+	}
+
+	&.btn-list {
+		display: flex !important;
+		flex-direction: row !important;
+		gap: get(margin, small);
+
+		>* {
+			flex: 1;
+			margin: 0 !important;
+			white-space: nowrap;
+		}
+	}
+}

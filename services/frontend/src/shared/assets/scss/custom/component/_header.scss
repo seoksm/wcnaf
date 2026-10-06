@@ -1,0 +1,114 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+#krds-header{
+	.header_top{
+		border-bottom: 1px solid get(border, default);
+	
+		.inner{
+			padding: 0 get(content-margin, large);
+			
+			.header_util{
+				display: flex;
+				justify-content: right;
+				align-items: center;
+				height: 40px;
+	
+				li{
+					a{
+						position: relative;
+						padding: 0 get(padding,xxxlarge);
+						font-size: get(fontsize, default);
+						@include flex;
+						gap: get(margin, xsmall);
+					}
+					&:not(:first-child){
+						a{
+							&:before{
+								content: "";
+								position: absolute;
+								top: 50%;
+								left: 0;
+								width: 1px;
+								height: rem(12px);
+								background-color: get(border, default);
+								transform: translateY(-50%);
+							}
+						}
+					}
+				}
+			}
+			@media screen and (max-width: 599.9px){
+				padding: 0 get(content-margin, default);
+
+				.header_util{
+					li{
+						&:last-child{
+							display: none;
+						}
+						a{
+							padding: 0 get(padding, default);
+							font-size: get(fontsize, default);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#wrap{
+	#krds-header{
+		.header-container{
+			> .inner{
+				@media screen and (min-width: 1024px){
+					padding: get(margin, xlarge) get(content-margin, large);
+				}
+			}
+		}
+		.header-branding{
+			.logo {
+				a{
+					@include bgimg('logo.svg');
+				}
+			}
+			.header-actions{
+				margin-left: rem(48px);
+				justify-content: space-between;
+				flex: 1;
+
+				.btn-search{
+					@include flex;
+					flex-direction: column;
+					margin: rem(-5.5px) 0;
+					color: get(text, dark);
+					gap: get(margin, xsmall);
+					@include font_weight;
+					font-size: rem(17px);
+
+					.item-ico{
+						margin: 0;
+					}
+				}
+				@media screen and (min-width: 1024px){
+					.btn-search{
+						gap: get(margin, xsmall);
+
+						.item-ico{
+							transform: scale(1.2);
+						}
+					}
+				}
+				@media screen and (max-width: 1023.9px){
+					justify-content: flex-end;
+
+					.btn-search{
+						gap: rem(2px);
+					}
+				}
+			}
+			@media screen and (max-width: 1023.9px){
+				justify-content: space-between;
+			}
+		}
+	}
+}

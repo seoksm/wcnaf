@@ -1,0 +1,29 @@
+package ${basePackage};
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ${interfacePackage}.${name}Producer;;
+import ${dtoPackage}.${dtoName}ResponseDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class ${name}ProducerImpl implements ${name}Producer {
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public void produce(${dtoName}ResponseDto responseDto) {
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(responseDto);
+            kafkaTemplate.send("${topic}", jsonPayload);
+            log.info("|  SV  | CMD    | TOPIC | {}", "${topic}");
+        }catch (JsonProcessingException e){
+            log.error("${description}: error={}", e.getMessage());
+        }
+    }
+}

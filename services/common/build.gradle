@@ -1,0 +1,147 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.5.8'
+    id 'io.spring.dependency-management' version '1.1.3'
+    id 'maven-publish'
+}
+ext['tomcat.version'] = '9.0.115'
+
+group = "com.winitech.wcnaf"
+version = "0.0.5"
+sourceCompatibility = '17'
+
+var egovframeVersion = '4.3.0'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.egovframe.go.kr/maven/' }
+}
+
+configurations.all {
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+    exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+    exclude group: 'org.slf4j', module: 'log4j-over-slf4j'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+}
+
+dependencies {
+    // eGovFrame
+    compileOnly "org.egovframe.rte:org.egovframe.rte.ptl.mvc:${egovframeVersion}"
+    compileOnly "org.egovframe.rte:org.egovframe.rte.fdl.cmmn:${egovframeVersion}"
+    compileOnly "org.egovframe.rte:org.egovframe.rte.psl.dataaccess:${egovframeVersion}"
+    compileOnly "org.egovframe.rte:org.egovframe.rte.fdl.logging:${egovframeVersion}"
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation' // NotE
+    implementation 'org.springframework.kafka:spring-kafka'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    
+    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0' // Boot 2.6 지원 안함
+
+    // DB 설정
+    //runtimeOnly 'org.postgresql:postgresql:42.2.23'
+    //testRuntimeOnly 'com.h2database:h2'
+    //implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0' // Boot 2.6 지원 안함
+
+    // AWS S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+    // Bcrypt
+    // https://mvnrepository.com/artifact/org.mindrot/jbcrypt
+    implementation 'org.mindrot:jbcrypt:0.4'
+    
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    
+    // Excel 
+    implementation 'org.jxls:jxls:2.14.0'
+    implementation 'org.jxls:jxls-poi:2.14.0'
+    
+    // Log4jdbc
+    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+    
+    // Mybatis
+    //implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.2'
+    implementation 'org.mybatis:mybatis:3.5.19'
+    implementation 'org.mybatis:mybatis-spring:2.1.2'
+
+    // QueryDsl
+    implementation 'com.querydsl:querydsl-jpa:4.4.0'
+    annotationProcessor("com.querydsl:querydsl-apt:4.4.0:jpa")
+
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    annotationProcessor('javax.annotation:javax.annotation-api:1.3.2')
+    
+    // Thumbnail
+    implementation 'net.coobird:thumbnailator:0.4.20'
+
+    // Quartz
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+}
+
+//jib {
+//    from {
+//        image = "eclipse-temurin:17-jre-alpine"
+//    }
+//    container {
+//        extraClasspath ['/app.jar']
+//        //entrypoint = ["java","-Xmx400M","-Djava.security.egd=file:/dev/./urandom","-Duser.timezone=Asia/Seoul","-jar","/app.jar"]
+//        jvmFlags = ["-Xms128m", "-Xmx128m"]
+//        ports = ['8092']
+//    }
+//}
+
+//tasks.named('test') {
+//    useJUnitPlatform()
+//}
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    
+    repositories {
+        maven {
+            def dummyUrl = "http://dummy.not-existing-domain.kr/"
+
+            def releasesRepoUrl = uri(project.findProperty("repoUrl") ?: dummyUrl)
+            def snapshotsRepoUrl = uri(project.findProperty("repoSnapshotUrl") ?: releasesRepoUrl)
+            
+            if (project.gradle.startParameter.taskNames.contains('publish')) {
+                if (releasesRepoUrl.toString() == dummyUrl) {
+                    throw new GradleException("ERROR: You are using a dummy URL for the repository. Please set 'repoUrl' and 'repoSnapshotUrl' project properties. (`gradle.properties` file)")
+                }
+
+                url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+
+                credentials {
+                    username = project.findProperty("repoUsername") ?: ""
+                    password = project.findProperty("repoPassword") ?: ""
+                }
+            }
+        }
+    }
+}

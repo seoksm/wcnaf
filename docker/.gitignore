@@ -1,0 +1,4 @@
+log*
+data*
+postgres_data
+.env

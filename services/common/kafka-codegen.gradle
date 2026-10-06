@@ -1,0 +1,458 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        def groovyVersion = GroovySystem.version
+        def groupId = groovyVersion.startsWith('4') ? 'org.apache.groovy' : 'org.codehaus.groovy'
+        classpath "${groupId}:groovy-yaml:${groovyVersion}"
+    }
+}
+
+import org.yaml.snakeyaml.Yaml
+import groovy.text.SimpleTemplateEngine
+import groovy.json.JsonOutput
+
+// ============================================================================
+// 1. Core Generator Functions (Java Fields, DTO formatting, JSON example)
+// ============================================================================
+
+def buildJavaFields(fieldsList, objMap, basePackagePrefix, type, indent = "    ") {
+    def engine = new SimpleTemplateEngine()
+    def outputDir = file("${project.projectDir}/src/main/java")
+    def commonDir = project(':common').projectDir
+    def templateDir = file("${commonDir}/src/main/resources/templates")
+
+    def fieldsSb = new StringBuilder()
+    def innerClassesSb = new StringBuilder()
+
+    fieldsList.each { field ->
+        def fieldName = field.name
+        def fieldType = field.type
+
+        if(field.useObj != null) {
+            def dto = objMap["${field.useObj}"]
+            def dtoTail = type == "sub" ? "RequestDto" : "ResponseDto"
+
+            def dtoBinding = [
+                    name: dto.name,
+                    fields: buildJavaFields(dto.dto, objMap, basePackagePrefix, type, "    "),
+                    basePackage: "${basePackagePrefix}.${dto.domain}"
+            ]
+            fieldType = "${basePackagePrefix}.${dto.domain}.${dto.name}${dtoTail}"
+
+            writeTemplate(
+                    outputDir,
+                    dtoBinding.basePackage,
+                    "${dtoBinding.name}${dtoTail}.java",
+                    file("${templateDir}/${type}Dto.tmpl"),
+                    dtoBinding,
+                    "SUB DTO Inner"
+            )
+        }
+
+        // Case A: List/Array
+        if (fieldType?.equalsIgnoreCase("list") || fieldType?.equalsIgnoreCase("array")) {
+            if (field.items) {
+                def innerClassName = fieldName.capitalize()
+                fieldsSb.append("${indent}private List<${innerClassName}> ${fieldName};\n")
+
+                def innerFieldsCode = buildJavaFields(field.items, objMap, basePackagePrefix, type, indent + "    ")
+
+                innerClassesSb.append("\n")
+                innerClassesSb.append("${indent}@Getter\n${indent}@Setter\n${indent}@ToString\n${indent}@Builder\n")
+                innerClassesSb.append("${indent}public static class ${innerClassName} {\n")
+                innerClassesSb.append(innerFieldsCode)
+                innerClassesSb.append("${indent}}\n")
+            } else {
+                fieldsSb.append("${indent}private List<String> ${fieldName};\n")
+            }
+        }
+        // Case B: Object
+        else if (fieldType?.equalsIgnoreCase("object")) {
+            def innerClassName = fieldName.capitalize()
+            fieldsSb.append("${indent}private ${innerClassName} ${fieldName};\n")
+
+            def subFields = field.items ?: []
+            def innerFieldsCode = buildJavaFields(subFields, objMap, basePackagePrefix, type, indent + "    ")
+
+            innerClassesSb.append("\n")
+            innerClassesSb.append("${indent}@Getter\n${indent}@Setter\n${indent}@ToString\n${indent}@Builder\n")
+            innerClassesSb.append("${indent}public static class ${innerClassName} {\n")
+            innerClassesSb.append(innerFieldsCode)
+            innerClassesSb.append("${indent}}\n")
+        }
+        // Case C: Enum
+        else if (fieldType?.equalsIgnoreCase("enum")) {
+            def enumInfo = field.enumClass
+
+            if(enumInfo.path == null){
+                def enumName = enumInfo.name
+                fieldsSb.append("${indent}private ${enumName} ${fieldName};\n")
+
+                innerClassesSb.append("\n")
+                innerClassesSb.append("${indent}@Getter\n${indent}@RequiredArgsConstructor\n")
+                innerClassesSb.append("${indent}public enum ${enumName} {\n")
+
+                def consts = []
+                enumInfo.constants.each { c ->
+                    consts.add("${indent}    ${c.name}(\"${c.value}\")")
+                }
+                innerClassesSb.append(consts.join(',\n')).append(";\n")
+                innerClassesSb.append("${indent}    private final String description;\n${indent}}\n")
+            }else{
+                fieldsSb.append("${indent}private ${enumInfo.path} ${fieldName};\n")
+            }
+        }
+        // Case D: Primitive/String
+        else {
+            def finalType = fieldType ?: "String"
+            fieldsSb.append("${indent}private ${finalType} ${fieldName};\n")
+        }
+    }
+    return fieldsSb.toString() + innerClassesSb.toString()
+}
+
+def formatDtoDetails(dtoData, objMap) {
+    if (!dtoData) return "-"
+
+    def lines = ["{"]
+
+    def parseFields
+    parseFields = { fieldsList, depth ->
+        def indentStr = "&emsp;" * depth
+
+        fieldsList.each { item ->
+            if (item instanceof Map && (item.containsKey('name') || item.containsKey('useObj'))) {
+                def fieldName = item.name ?: item.useObj ?: "unknown_field"
+
+                if (item.containsKey('useObj')) {
+                    def refName = item.useObj
+                    lines.add("${indentStr}<strong>${fieldName}</strong> : <code>Object</code> {")
+
+                    if (objMap.containsKey(refName) && objMap[refName].dto) {
+                        parseFields(objMap[refName].dto, depth + 1)
+                    }
+                    lines.add("${indentStr}}")
+                }
+                else if (item.containsKey('type')) {
+                    def fieldType = item.type.replace('<','[').replace('>',']')
+
+                    if ((fieldType.equalsIgnoreCase("list") || fieldType.equalsIgnoreCase("array")) && item.containsKey('items')) {
+                        lines.add("${indentStr}<strong>${fieldName}</strong> : <code>List&lt;Object&gt;</code> [")
+                        parseFields(item.items, depth + 1)
+                        lines.add("${indentStr}]")
+                    }
+                    else if (fieldType.equalsIgnoreCase("object") && item.containsKey('items')) {
+                        lines.add("${indentStr}<strong>${fieldName}</strong> : <code>Object</code> {")
+                        parseFields(item.items, depth + 1)
+                        lines.add("${indentStr}}")
+                    }
+                    else if (fieldType.equalsIgnoreCase("enum") && item.containsKey('enumClass') && item.enumClass instanceof Map) {
+                        def enumClass = item.enumClass
+                        def constantPairs = []
+
+                        if (enumClass.containsKey('constants') && enumClass.constants instanceof List) {
+                            enumClass.constants.each { constItem ->
+                                if (constItem instanceof Map && constItem.containsKey('name')) {
+                                    def cName = constItem.name
+                                    def cValue = constItem.value ?: ""
+                                    constantPairs.add(cValue ? "${cName} : ${cValue}" : "${cName}")
+                                } else {
+                                    constantPairs.add(constItem.toString())
+                                }
+                            }
+                        }
+                        def constantsStr = constantPairs ? " <span style='color:#0969da; font-weight:bold;'>[ ${constantPairs.join(', ')} ]</span>" : ""
+                        lines.add("${indentStr}<strong>${fieldName}</strong> : <code>${fieldType}</code>${constantsStr}")
+                    }
+                    else {
+                        lines.add("${indentStr}<strong>${fieldName}</strong> : <code>${fieldType}</code>")
+                    }
+                }
+                else {
+                    lines.add("${indentStr}<strong>${fieldName}</strong> : <code>String</code>")
+                }
+            } else if (item instanceof Map) {
+                item.each { k, v -> lines.add("${indentStr}${k} : <code>${v}</code>") }
+            } else {
+                lines.add("${indentStr}${item}")
+            }
+        }
+    }
+
+    if (dtoData instanceof List) {
+        parseFields(dtoData, 1)
+    } else {
+        lines.add("&emsp;${dtoData}")
+    }
+
+    lines.add("}")
+    return lines.join("<br>")
+}
+
+def formatJsonExample(dtoData, objMap) {
+    if (!dtoData) return "{}"
+
+    def buildJsonMap
+    buildJsonMap = { fieldsList ->
+        def map = [:]
+        fieldsList.each { item ->
+            if (item instanceof Map && (item.containsKey('name') || item.containsKey('useObj'))) {
+                def fieldName = item.name ?: item.useObj ?: "unknown_field"
+
+                if (item.containsKey('useObj')) {
+                    def refName = item.useObj
+                    if (objMap.containsKey(refName) && objMap[refName].dto) {
+                        map.put(fieldName, buildJsonMap(objMap[refName].dto))
+                    } else {
+                        map.put(fieldName, [:])
+                    }
+                }
+                else if (item.containsKey('type')) {
+                    def fieldType = item.type
+                    def fieldExample = item.example
+
+                    if ((fieldType.equalsIgnoreCase("list") || fieldType.equalsIgnoreCase("array")) && item.containsKey('items')) {
+                        map.put(fieldName, [buildJsonMap(item.items)])
+                    }
+                    else if (fieldType.equalsIgnoreCase("object") && item.containsKey('items')) {
+                        map.put(fieldName, buildJsonMap(item.items))
+                    }
+                    else if (fieldType.equalsIgnoreCase("enum") && item.containsKey('enumClass') && item.enumClass instanceof Map) {
+                        def enumClass = item.enumClass
+                        def firstConst = "ENUM_VALUE"
+                        if (enumClass.containsKey('constants') && enumClass.constants instanceof List && !enumClass.constants.isEmpty()) {
+                            def constItem = enumClass.constants[0]
+                            firstConst = (constItem instanceof Map) ? (constItem.name ?: "ENUM_VALUE") : constItem.toString()
+                        }
+                        map.put(fieldName, firstConst)
+                    }
+                    else {
+                        if(fieldExample != null){
+                            map.put(fieldName, fieldExample);
+                        }else{
+                            switch(fieldType.toLowerCase()) {
+                                case 'string': map.put(fieldName, "string"); break
+                                case 'long': case 'int': case 'integer': map.put(fieldName, 0); break
+                                case 'double': case 'float': map.put(fieldName, 0.0); break
+                                case 'boolean': map.put(fieldName, true); break
+                                case 'uuid': map.put(fieldName, "00000000-0000-0000-0000-000000000000"); break
+                                default: map.put(fieldName, null)
+                            }
+                        }
+                    }
+                }
+                else {
+                    map.put(fieldName, "string")
+                }
+            }
+        }
+        return map
+    }
+
+    def resultMap = buildJsonMap(dtoData)
+    def prettyJson = JsonOutput.prettyPrint(JsonOutput.toJson(resultMap))
+    return "<pre><code class=\"language-json\">\n${prettyJson}\n</code></pre>"
+}
+
+// ============================================================================
+// 2. I/O & Template Utility
+// ============================================================================
+def writeTemplate(outputDir, pkgPath, fileName, templateFile, bindingParams, logPrefix = "") {
+    def dir = new File(outputDir, pkgPath.replace('.', '/'))
+    dir.mkdirs()
+    def targetFile = new File(dir, fileName)
+    targetFile.text = new SimpleTemplateEngine().createTemplate(templateFile).make(bindingParams).toString()
+    println "=====[${logPrefix}] ${pkgPath}.${fileName} 생성======"
+}
+
+// ============================================================================
+// 3. Component Generators (Pub/Sub)
+// ============================================================================
+def generateSubComponents(eventName, eventData, spec, objMap, outputDir, templateDir) {
+    def basePackagePrefix = "${spec.basePackage}.interfaces.inboundAdapter.eventListener"
+
+    // 1) DTO Setup
+    def dto = eventData.useObj ? objMap["${eventData.useObj}"] : eventData
+    def dtoBinding = [
+            name: eventData.useObj ? dto.name : eventName,
+            fields: buildJavaFields(dto.dto, objMap, basePackagePrefix, "sub", "    "),
+            basePackage: "${basePackagePrefix}.${dto.domain}"
+    ]
+
+    writeTemplate(outputDir, dtoBinding.basePackage, "${dtoBinding.name}RequestDto.java", file("${templateDir}/SubDto.tmpl"), dtoBinding, "SUB")
+
+    // 2) Broker Interface
+    def brokerInterfaceBinding = [
+            name: eventName,
+            basePackage: "${basePackagePrefix}.${eventData.domain}"
+    ]
+    writeTemplate(outputDir, brokerInterfaceBinding.basePackage, "${eventName}Handler.java", file("${templateDir}/SubBrokerInterface.tmpl"), brokerInterfaceBinding, "SUB")
+
+    // 3) Service Interface
+    def serviceInterfaceBinding = [
+            name: eventName,
+            basePackage: "${spec.basePackage}.domain.${eventData.domain}",
+            dtoPackage: "${dtoBinding.basePackage}",
+            dtoName: "${dtoBinding.name}"
+    ]
+    writeTemplate(outputDir, serviceInterfaceBinding.basePackage, "${eventName}Service.java", file("${templateDir}/SubServiceInterface.tmpl"), serviceInterfaceBinding, "SUB")
+
+    // 4) Kafka Broker Impl
+    if (eventData.broker == "kafka") {
+        def brokerBinding = [
+                name: eventName,
+                basePackage: "${spec.basePackage}.infrastructure.${eventData.domain}",
+                interfacePackage: "${brokerInterfaceBinding.basePackage}",
+                serviceInterfacePackage: "${serviceInterfaceBinding.basePackage}",
+                dtoPackage: "${dtoBinding.basePackage}",
+                dtoName: "${dtoBinding.name}",
+                topic: "${eventData.topic}",
+                group: "${project.name}",
+                description: "${eventData.description}"
+        ]
+        writeTemplate(outputDir, brokerBinding.basePackage, "${eventName}HandlerImpl.java", file("${templateDir}/SubBrokerKafka.tmpl"), brokerBinding, "SUB")
+    }
+    return dto // Return resolved dto for markdown generation
+}
+
+def generatePubComponents(eventName, eventData, spec, objMap, outputDir, templateDir) {
+    def basePackagePrefix = "${spec.basePackage}.interfaces.outboundAdapter.eventProducer"
+
+    // 1) DTO Setup
+    def dto = eventData.useObj ? objMap["${eventData.useObj}"] : eventData
+    def dtoBinding = [
+            name: eventData.useObj ? dto.name : eventName,
+            fields: buildJavaFields(dto.dto, objMap, basePackagePrefix, "pub", "    "),
+            basePackage: "${basePackagePrefix}.${dto.domain}"
+    ]
+
+    writeTemplate(outputDir, dtoBinding.basePackage, "${dtoBinding.name}ResponseDto.java", file("${templateDir}/PubDto.tmpl"), dtoBinding, "PUB")
+
+    // 2) Broker Interface
+    def brokerInterfaceBinding = [
+            name: eventName,
+            dtoPackage: "${dtoBinding.basePackage}",
+            dtoName: "${dtoBinding.name}",
+            basePackage: "${basePackagePrefix}.${eventData.domain}"
+    ]
+    writeTemplate(outputDir, brokerInterfaceBinding.basePackage, "${eventName}Producer.java", file("${templateDir}/PubBrokerInterface.tmpl"), brokerInterfaceBinding, "PUB Producer")
+
+    // 3) Kafka Broker Impl
+    if (eventData.broker == "kafka") {
+        def brokerBinding = [
+                name: eventName,
+                basePackage: "${spec.basePackage}.infrastructure.${eventData.domain}",
+                interfacePackage: "${brokerInterfaceBinding.basePackage}",
+                dtoPackage: "${dtoBinding.basePackage}",
+                dtoName: "${dtoBinding.name}",
+                topic: "${eventData.topic}",
+                group: "${project.name}",
+                description: "${eventData.description}"
+        ]
+        writeTemplate(outputDir, brokerBinding.basePackage, "${eventName}ProducerImpl.java", file("${templateDir}/PubBrokerKafka.tmpl"), brokerBinding, "PUB")
+    }
+    return dto
+}
+
+// ============================================================================
+// 4. Markdown Helpers
+// ============================================================================
+def getMarkdownHeader() {
+    return """# 📝 Event Specification
+
+<div style="min-width: 100%; overflow-x: auto; margin: 20px 0;">
+  <table style="width: 100%; min-width: 1000px; border-collapse: collapse; text-align: left; font-size: 14px; line-height: 1.6;">
+    <thead>
+      <tr style="background-color: #f6f8fa; border-bottom: 2px solid #d0d7de;">
+        <th style="padding: 12px 16px; font-weight: 600; border: 1px solid #d0d7de; width: 8%; text-align: center;">구분</th>
+        <th style="padding: 12px 16px; font-weight: 600; border: 1px solid #d0d7de; width: 22%;">이벤트명 / 설명</th>
+        <th style="padding: 12px 16px; font-weight: 600; border: 1px solid #d0d7de; width: 25%;">토픽 (Topic)</th>
+        <th style="padding: 12px 16px; font-weight: 600; border: 1px solid #d0d7de; width: 35%;">DTO 상세 ({ key : type })</th>
+        <th style="padding: 12px 16px; font-weight: 600; border: 1px solid #d0d7de; width: 10%; text-align: center;">브로커</th>
+      </tr>
+    </thead>
+    <tbody>
+"""
+}
+
+def getMarkdownRow(type, eventName, description, topic, broker, dtoDetails, jsonExample) {
+    def badgeColor = type == "SUB" ? "background-color:#e6ffed; color:#22863a;" : "background-color:#dbedff; color:#0366d6;"
+
+    return """      <tr style="border-bottom: 1px solid #d0d7de;">
+        <td style="padding: 14px 16px; vertical-align: top; border: 1px solid #d0d7de; text-align: center;"><span style="${badgeColor} padding:2px 6px; border-radius:3px; font-size:12px; font-weight:bold;">${type}</span></td>
+        <td style="padding: 14px 16px; vertical-align: top; border: 1px solid #d0d7de;"><strong style="color:#0969da;">${eventName}</strong><br><span style="color:#57606a; font-size:13px;">${description}</span></td>
+        <td style="padding: 14px 16px; vertical-align: top; font-family: monospace; background-color: #f8f9fa; border: 1px solid #d0d7de; color: #cf222e; font-weight: bold; word-break: break-all;">${topic}</td>
+        <td style="padding: 14px 16px; vertical-align: top; border: 1px solid #d0d7de; font-size: 13px;">${dtoDetails}<br><br>
+          <details style="cursor:pointer;">
+            <summary style="color:#0969da; font-weight:bold; margin-bottom:10px;">💡 JSON Payload Example</summary>
+            ${jsonExample}
+          </details>
+        </td>
+        <td style="padding: 14px 16px; vertical-align: top; text-align: center; border: 1px solid #d0d7de;"><span style="background-color: #dafbe1; color: #1a7f37; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">${broker}</span></td>
+      </tr>
+"""
+}
+
+// ============================================================================
+// 5. Main Gradle Task
+// ============================================================================
+task generateKafkaCode {
+    def outputDir = file("${project.projectDir}/src/main/java")
+    def commonDir = project(':common').projectDir
+    def templateDir = file("${commonDir}/src/main/resources/templates")
+    def yamlFile = file("${project.projectDir}/src/main/resources/eventSpec.yml")
+
+    onlyIf { yamlFile.exists() }
+
+    doLast {
+        def spec = yamlFile.withInputStream { stream -> new Yaml().load(stream)}
+        def objMap = spec.obj ?: [:]
+
+        def mdSb = new StringBuilder()
+        mdSb.append(getMarkdownHeader())
+
+        // [1] SUB 처리
+        if (spec.sub) {
+            spec.sub.each { eventName, eventData ->
+                def resolvedDto = generateSubComponents(eventName, eventData, spec, objMap, outputDir, templateDir)
+
+                mdSb.append(getMarkdownRow(
+                        "SUB",
+                        eventName,
+                        eventData.description ?: "-",
+                        eventData.topic ?: "-",
+                        eventData.broker ?: "-",
+                        formatDtoDetails(resolvedDto.dto, objMap),
+                        formatJsonExample(resolvedDto.dto, objMap)
+                ))
+            }
+        }
+
+        // [2] PUB 처리
+        if (spec.pub) {
+            spec.pub.each { eventName, eventData ->
+                def resolvedDto = generatePubComponents(eventName, eventData, spec, objMap, outputDir, templateDir)
+
+                mdSb.append(getMarkdownRow(
+                        "PUB",
+                        eventName,
+                        eventData.description ?: "-",
+                        eventData.topic ?: "-",
+                        eventData.broker ?: "-",
+                        formatDtoDetails(resolvedDto.dto, objMap),
+                        formatJsonExample(resolvedDto.dto, objMap)
+                ))
+            }
+        }
+
+        mdSb.append("    </tbody>\n  </table>\n</div>\n\n---\n")
+
+        def reportFile = new File(file("${project.projectDir}/src/main/resources"), "eventSpec.md")
+        reportFile.text = mdSb.toString()
+        println "=====[SUCCESS] useObj 완벽 지원 명세 문서 생성 완료: ${reportFile.absolutePath} ======"
+    }
+}
+
+compileJava.dependsOn generateKafkaCode

@@ -1,0 +1,282 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+/* jquery ui datepicker custop */
+.wrap-datepicker {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: get(margin, small) 0;
+  
+	.unit {
+	  display: inline-block;
+	  width: 20px;
+	  text-align: center;
+	}
+  
+	.datepicker {
+	  //display: inline-block;
+	  flex: 1;
+	  //width: calc(50% - 10px);
+  
+	  input {
+		margin: 0 !important;
+	  }
+
+	  &.only{
+		width: 140px;
+	  }
+	  &.month{
+		width: 100px;
+	  }
+	  &.year{
+		width: 120px;
+	  }
+	}
+  
+	.wrap-input & {
+	  width: 100%;
+  
+	  .datepicker {
+  
+		input {
+		  width: 100%;
+		}
+	  }
+	}
+  
+	@include mobile {
+	  
+	  .area-search .search-wrap &{
+		
+		.datepicker {
+		
+			input {
+			  min-width: auto;
+			}
+		  }
+	  }
+	}
+  }
+  
+  .datepicker {
+	position: relative;
+	display: block;
+	max-width: 160px;
+  
+	input {
+	  width: 100%;
+	  //min-width: 160px;
+	  padding-right: calc(get(btnsize, xsmall) + (get(padding, small) * 2));
+  
+	  &:required,
+	  &:read-only {
+  
+		& + button {
+		  background-color: transparent;
+		}
+	  }
+  
+	  &:disabled {
+  
+		& + button.ui-datepicker-trigger {
+		  display: none;
+		}
+	  }
+	}
+  
+	.ui-datepicker-trigger {
+	  @include btnIco ($icoPos : icon, $btnSize : get(btnsize, xsmall), $icoSize : get(ico, default));
+  
+	  position: absolute;
+	  top: 50%;
+	  transform: translateY(-50%);
+	  right: 2px;
+	  padding: get(padding, small);
+	  border-radius: get(radius, xsmall);
+	  z-index: 5;
+	  cursor: pointer;
+  
+	  @include activeColor($bgColor: get(background, white), $borderColor: get(border, main));
+  
+	  img {
+		opacity: 0;
+		display: none;
+	  }
+  
+	  &::before {
+		@include icoMatrix(0, 4);
+	  }
+	}
+  
+	.wrap-input & {
+	  width: 100%;
+	  
+	  input.hasdatepicker {
+		width: 100%;
+	  }
+	}
+  }
+  
+  .ui-datepicker {
+	font-size: get(fontsize, default);
+	z-index: 100 !important;
+  
+	table {
+	  min-width: auto;
+	}
+  
+	select{
+	  min-width: 0;
+	  min-height: 28px;
+	}
+  
+	.ui-datepicker-title {
+  
+	  select{
+		width: calc(45% - 10px);
+		min-width: 0;
+		padding: 0 2.4rem 0 8px;
+  
+		&+select {
+		  margin-left: 8px;
+		}
+	  }
+	}
+  
+	&.ui-widget-content {
+	  background: get(background, white);
+	}
+	
+	&.only{
+	  .ui-datepicker-calendar{
+		display: none !important;
+	  }
+	  &.onlyyear{
+		.ui-datepicker-prev, .ui-datepicker-next, .ui-datepicker-month{
+		  display: none !important;
+		}
+	  }
+	  &.onlymonth{
+		.ui-datepicker-prev, .ui-datepicker-next, .ui-datepicker-year{
+		  display: none !important;
+		}
+	  }
+	}
+  
+	.ui-widget-header {
+	  padding: 4px 0;
+	  border: none;
+	  background: get(background, main);
+  
+	  .ui-datepicker-prev,
+	  .ui-datepicker-next {
+		cursor: pointer;
+  
+		span {
+		  position: relative;
+		  background: none;
+		  text-align: left;
+		  text-indent: -999px;
+		  overflow: hidden;
+  
+		  &::before {
+			content: "";
+			display: block;
+			position: absolute;
+			top: 5px;
+			width: 6px;
+			height: 6px;
+			border-right: 1px solid get(border, white);
+			border-bottom: 1px solid get(border, white);
+			-webkit-transform-origin: center;
+					transform-origin: center;
+		  }
+		}
+  
+		&.ui-state-hover {
+		  border: 1px solid get(border, main);
+		  background: none;
+		}
+	  }
+  
+	  .ui-datepicker-prev span::before {
+		-webkit-transform: rotate(-225deg);
+				transform: rotate(-225deg);
+		left: 5px;
+	  }
+  
+	  .ui-datepicker-next span::before {
+		-webkit-transform: rotate(-45deg);
+				transform: rotate(-45deg);
+		right: 5px;
+	  }
+  
+	  select{
+		position: relative;
+		height: auto;
+		width: auto;
+		background: url("../img/ico_datepicker_select.svg") no-repeat top calc(50% + 1px) right;
+		border: none;
+		color: get(text, white);
+		font-weight: bold;
+		padding: 0 24px 0 0;
+		margin: 0;
+		cursor: pointer;
+		transition: 0.15s;
+  
+		&:hover{
+		  background-position-y: calc(50% + 3px);
+		}
+  
+		-o-appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+  
+		&.ui-datepicker-year{
+		  margin-right: 5px;
+		}
+		&::-ms-expand { 
+		  display: none;
+		}
+		&:not(:first-child){
+		  margin-left: 10px;
+		  letter-spacing: 0.5px;
+		}
+  
+		option{
+		  color: get(text, black);
+		  font-weight: normal;
+		}
+	  }
+  
+	}
+  
+	.ui-state-default {
+	  border: 1px solid get(border, white);
+	  border-radius: 4px;
+	  background: none;
+	  color: get(text, default);
+	  text-align: center;
+	  @include font_weight;
+  
+	  &.ui-state-highlight,
+	  &.ui-state-hover {
+		border: 1px solid get(border, main);
+		background: get(background, white);
+		color: get(text, black);
+	  }
+  
+	  &.ui-state-active {
+		border: 1px solid get(border, main);
+		background: lighten(get(background, main), 10%);
+		color: get(text, white);
+	  }
+	}
+  
+	&.datapicker-typemonth {
+	  .ui-datepicker-calendar {
+		display: none;
+	  }
+	}
+}

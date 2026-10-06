@@ -1,0 +1,438 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+#content{
+	> .area-btn{
+		&:first-child{
+			height: 0;
+			margin-top: get(margin, default);
+		}
+	}
+}
+
+// 컨텐츠 영역
+.conts-area {
+	&:not(:first-child){
+		margin-top: get(content-margin, large);
+		gap: calc(get(content-margin, xlarge) * 2);
+	}
+
+	// 1차 타이틀
+	@include sec-tit-style(h3) {
+		font-size: get(title, xlarge);
+		//color: get(text, main);
+		color: get(text, sub1);
+
+		@media screen and (max-width: 760px){
+			font-size: get(title, default);
+		}
+	}
+
+	// 2차 타이틀
+	@include sec-tit-style(h4) {
+		/* padding-left: calc(rem(32px) + get(padding, xsmall)); */
+		font-size: get(title, default);
+		//color: get(text, main);
+
+		/* &::before{
+			content: '';
+			position: absolute;
+			top: calc(((get(title, default)*1.5) - get(title, default)) / 2);
+			left: 0;
+			@include WH(rem(22px), rem(32px));
+			@include bgimg('ico_title.svg', $size: get(ico, xxxlarge), $posi: center);
+		} */
+		@media screen and (max-width: 760px){
+			font-size: get(title, small);
+		}
+	}
+
+	// 3차 타이틀
+	@include sec-tit-style(h5) {
+		font-size: get(title, small);
+
+		@media screen and (max-width: 760px){
+			font-size: get(title, xsmall);
+		}
+	}
+
+	> .area-box{
+		margin-top: 0;
+
+		&:not(:first-child){
+			margin-top: 0;
+		}
+	}
+}
+
+// 드롭메뉴
+.dropmenu_wrap{
+	position: relative;
+	display: inline-block;
+
+	.drop-menu{
+		position: absolute;
+		top: calc(100% + get(margin, xlarge));
+		left: 50%;
+		background-color: get(background, white);
+		border: 2px solid get(border, main);
+		transform: translateX(-50%);
+		border-radius: get(radius, xsmall);
+		z-index: 1;
+
+		display: none;
+
+		.drop-in{
+			border-radius: get(radius, xsmall);
+			overflow: hidden;
+		}
+		.drop-list{
+			max-height: 150px;
+			overflow-y: auto;
+			overflow-x: hidden;
+
+			li{
+				&:not(:last-child){
+					border-bottom: 1px solid get(border, default);
+				}
+				a{
+					display: block;
+					padding: get(padding, small) get(padding, xlarge);
+
+					&:hover, &:focus{
+						background-color: get(background, main-light);
+					}
+				}
+			}
+		}
+
+		&::before, &:after{
+			content: '';
+			position: absolute;
+			bottom: 100%;
+			left: 50%;
+			border-style: solid;
+			transform: translateX(-50%);
+		}
+		&::before{
+			border-width: 0 8px 10px 8px;
+			border-color: transparent transparent get(background, main);
+		}
+		&::after{
+			border-width: 0 5px 7px 5px;
+			border-color: transparent transparent get(background, white);
+		}
+	}
+}
+
+// 강조 텍스트
+.c_point{
+	color: get(text, point);
+}
+.c_main{
+	color: get(text, main);
+}
+.c_warn {
+	color: get(text, warn);
+}
+.c_sub1{
+	color: get(text, sub1);
+}
+.c_sub2{
+	color: get(text, sub2);
+}
+.c_white {
+	color: get(text, white);
+}
+
+.fontsize_xx {
+	font-size: get(fontsize, xxlarge);
+}
+
+.fontsize_title{
+	font-size: get(title, default);
+}
+
+.sec-tit{
+	~ .area-box{
+		margin-top: get(content-margin, xlarge);
+	}
+}
+
+.area-box{
+	&:not(:first-child){
+		margin-top: get(content-margin, large);
+	}
+}
+
+// 내용 설명 박스
+.info-box{
+	position: relative;
+    padding: get(content-margin, default) get(content-margin, xlarge);
+    border-radius: get(radius, default);
+	border: 2px solid get(border, main);
+	background-color: get(background, main-light);
+
+	@include tabletLess{
+		padding: get(content-margin, default);
+	}
+	p{
+		font-size: get(fontsize, large);
+	}
+
+	&:not(:first-child){
+		margin-top: get(content-margin, large);
+	}
+	&.type-bg{
+		border: 0;
+		background-color: get(gray, eee);
+	}
+	&.type-danger{
+		border: 2px solid get(toast, danger);
+		background-color: get(toast, danger-light);
+	}
+	&.type-warning{
+		border: 2px solid get(toast, warning);
+		background-color: get(toast, warning-light);
+	}
+	&.type-success{
+		border: 2px solid get(toast, success);
+		background-color: get(toast, success-light);
+	}
+
+	.title{
+		font-size: get(title, small);
+		color: get(text, sub1);
+
+		+ *:not(:first-child){
+			margin-top: get(margin, default);
+		}
+	}
+}
+
+// 일반 설명 텍스트 박스
+.desc-box{
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	flex-direction: column;
+	
+	&:not(:first-child){
+		margin-top: get(content-margin, large);
+	}
+	.desc{
+		+ .desc{
+			margin-top: get(content-margin, small);
+		}
+	}
+
+	.list_box &{
+		margin-top: get(margin, default);
+	}
+}
+
+.sr-only{
+	&:first-child{
+		+ *{
+			margin-top: 0;
+		}
+	}
+}
+
+.hidden{
+	@include itemHidden;
+}
+.bold{
+	font-weight: 700 !important;
+}
+.underline{
+	text-decoration: underline;
+}
+.c_highlight{
+	background-color: get(status, yellow);
+
+	.c_point{
+		color: #D5340C;
+	}
+}
+
+.img_box{
+	display: inline-flex;
+	align-items: flex-start;
+	justify-content: center;
+	flex-direction: column;
+	max-width: 100%;
+	gap: get(content-margin, default);
+	flex-wrap: wrap;
+
+	&.row{
+		flex-direction: row;
+	}
+	&:not(:first-child){
+		margin-top: get(content-margin, large);
+	}
+	> *{
+		//width: 100%;
+		margin-top: 0 !important;
+	}
+	.item{
+		text-align: center;
+		// display: flex;
+		// flex-direction: column;
+		border: 1px solid rgba(get(border, main), 0.5);
+		padding: get(margin, default);
+		background-color: get(background, white);
+		border-radius: get(radius, large);
+		width: auto;
+
+		img{
+			border-radius: get(radius, default);
+			object-fit: contain;
+		}
+		.desc-box{
+			.desc{
+				width: 100%;
+			}
+		}
+
+		table &{
+			border: 0;
+			padding: 0;
+
+			img{
+				max-height: rem(240px);
+			}
+		}
+
+		&.fit{
+			border: 0;
+			padding: 0;
+
+			img{
+				border-radius: 0;
+			}
+		}
+	}
+}
+
+
+.split_box{
+	&_row{
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		flex-wrap: wrap;
+
+		> .split_item{
+			flex: 1;
+			min-width: rem(260px);
+
+			> .req_guide{
+				margin: 0;
+			}
+		}
+		.tbl-list &{
+			margin-bottom: get(margin, xsmall);
+	
+			/* &:first-child{
+				margin-top: calc(get(fontsize, default) * -1.5);
+			} */
+		}
+	}
+}
+
+.loading_wrap {
+	position: fixed;
+	display: block;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: rgba(get(background, black), 0.6);
+	z-index: 9999999;
+
+	.item {
+		position: absolute;
+		display: inline-block;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+
+		.dot {
+			position: relative;
+			display: block;
+
+			> div {
+				position: relative;
+				display: block;
+				float: left;
+				width: 20px;
+				height: 20px;
+				margin: 20px 6px;
+				background: get(background, light);
+				border-radius: 50%;
+				animation: 0.5s bounce infinite alternate;
+
+				@for $i from 2 through 6 {
+					&:nth-child(#{$i}) {
+						animation-delay: (($i - 1) / 10) + s;
+					}
+				}
+			}
+
+			@keyframes bounce {
+				to {
+					opacity: 0.3;
+					transform: translate3d(0, -16px, 0);
+				}
+			}
+		}
+	}
+}
+
+.submenu4_wrap{
+	margin-bottom: get(content-margin, xxxlarge);
+
+	@mixin submenu4_grid($val){
+		ul{
+			grid-template-columns: repeat($val, 1fr);
+		}
+	}
+
+	@include submenu4_grid(5);
+
+	ul{
+		display: grid;
+
+		li{
+			position: relative;
+			border: 1px solid get(border, default);
+			margin: -0.5px;
+			z-index: 0;
+
+			a{
+				@include flex;
+				padding: get(padding, xxlarge) get(padding, default);
+				word-break: keep-all;
+				height: 100%;
+				font-size: rem(15px);
+				line-height: 1.4;
+				text-align: center;
+			}
+			&:hover, &:focus, &.on{
+				background-color: rgba(126,178,255,0.1);
+				border-color: get(border, main);
+				z-index: 1;
+			}
+		}
+	}
+
+	@media screen and (min-width: 1200.1px) and (max-width: 1400px){
+		@include submenu4_grid(4);
+	}
+	@media screen and (min-width: 650.1px) and (max-width: 1200px){
+		@include submenu4_grid(3);
+	}
+	@media screen and (max-width: 650px){
+		@include submenu4_grid(2);
+	}
+}

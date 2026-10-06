@@ -1,0 +1,133 @@
+// 🎨 $theme 기본 선언
+@use "theme" as *;
+
+// 🎨 모든 컬러 및 스타일을 `$theme` 내부에 한 번에 통합
+$theme: map-merge($theme, (
+  base: (
+    white: #fff,
+    black: #000,
+    transparent: transparent
+  ),
+  gray: (
+    light: #f5f5f5,
+    eee: #eee,
+    ddd: #ddd,
+    ccc: #ccc,
+    bbb: #bbb,
+    aaa: #aaa,
+    999: #999,
+    666: #666,
+    333: #333,
+    dark: #1D1D1D,
+  ),
+  brand: (
+    main: #2D69C2,
+    sub1: #0F4086,
+    sub2: #2DAAC2,
+    point: #D5340C,
+  ),
+  status: (
+    del: #A40C0C,
+    red: #E73306,
+    orange: #E77E06,
+    yellow: #ffff00,
+    green: #13791A,
+    blue: #004CFF,
+    indigo: #250094,
+    purple: #9b17e3
+  ),
+  status-levels: (
+    lv0: #2D69C2,
+    lv1: #13791A,
+    lv2: #ffff00,
+    lv3: #E77E06,
+    lv4: #E73306
+  ),
+  type: (
+    warn: darken(#E73306, 10%),
+    excel: #127F44,
+  ),
+  text: (
+    white: #fff,
+    light: #999,
+    default: #666,
+    dark: #333,
+    darken: #1D1D1D,
+    black: #000,
+    main: #2D69C2,
+    point: #D5340C,
+    main-darken: darken(#2D69C2, 20%),
+    main-light-point: #E5F2FA,
+    sub1: #0F4086,
+    sub2: #2DAAC2,
+    warn: darken(#E73306, 10%),
+    main-trans:lighten(#2D69C2, 30%),
+	disabled: #888,
+  ),
+  border: (
+    default: #bbb,
+    main-dark: darken(#2D69C2, 4%),
+    main-light: lighten(#2D69C2, 8%),
+    main-light2: lighten(#2D69C2, 53%),
+    main: #2D69C2,
+	point: #D5340C,
+    dark: #666,
+    white: #fff,
+    warn: darken(#E73306, 10%),
+    sub1: #0F4086,
+    sub2: #2DAAC2,
+    black: #000,
+  ),
+  background: (
+    default: lighten(#0F4086, 64%),
+    main-light: #F1F9FD,
+    sub1: #0F4086,
+    sub2: #2DAAC2,
+    white: #fff,
+    main-offwhite: #F4F7FC,
+    offwhite: #f5f5f5,
+    main: #2D69C2,
+    point: #D5340C,
+    light: #EEF7FC,
+    hover: #e9e9f7,
+    divider: #ddd,
+    disabled: #ccc,
+    light-gray: #eee,
+    warn: darken(#E73306, 10%),
+    black: #000,
+  ),
+  button: (
+    main: #2D69C2,
+    sub: #2DAAC2,
+    sub1: #0F4086,
+    other: #666,
+    light-gray: #eee,
+    warn: darken(#E73306, 10%)
+  ),
+  gradient: (
+    bg-gradient: linear-gradient(to bottom, null, #2DAAC2),
+    bg-gradient-r: linear-gradient(to right, null, #2DAAC2)
+  ),
+  table: (
+    main: #2D69C2,
+    border: #ddd,
+    th: #F1F9FD,
+    td: #fff,
+  ),
+  toast: (
+    danger : #f27681,
+    danger-light : #feeeef,
+    warning : #f08235,
+    warning-light : #fff7ec,
+    success : #0c9b95,
+    success-light : #f3ffff,
+    info : #2783E5,
+    info-light : #e7f8ff,
+  ),
+  sms: (
+	bg: #BACEE0,
+	bg-txt: #FEEC33,
+	bg-send: #b2b2b2,
+	btn: #225B73,
+  ),
+));

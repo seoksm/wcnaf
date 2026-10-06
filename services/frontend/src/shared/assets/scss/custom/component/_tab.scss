@@ -1,0 +1,20 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+.tab{
+	&.line{
+		&.full{
+			> ul{
+				flex-wrap: nowrap;
+
+				li{
+					width: fit-content;
+					flex: none;
+
+					.btn-tab{
+						padding: get(content-margin, default);
+					}
+				}
+			}
+		}
+	}
+}

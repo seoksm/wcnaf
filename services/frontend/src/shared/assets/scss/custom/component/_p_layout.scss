@@ -1,0 +1,38 @@
+@use "include" as *; // 변수, 함수, 믹스인 등을 사용하기 위해 include 파일을 불러온다.
+
+#container{
+	position: relative;
+	overflow: hidden;
+
+	&:not(.main-page){
+		&::before, &::after{
+			content: '';
+			position: absolute;
+			z-index: -1;
+			left: 50%;
+		}
+		&::before{
+			@include bgimg('sub_bg1.svg', contain);
+			@include WH(rem(838px), rem(682px));
+			margin-left: rem(-1255px);
+			top: rem(-170px);
+		}
+		&::after{
+			@include bgimg('sub_bg2.svg', contain);
+			@include WH(rem(698px), rem(676px));
+			margin-left: rem(590px);
+			top: rem(-240px);
+		}
+	}
+	.contents{
+		min-width: 0;
+	}
+}
+.inner{
+	max-width: rem($inner_width);
+
+	&.newwin{
+		padding: get(content-margin, default);
+		margin: 0;
+	}
+}

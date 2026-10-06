@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-system
+  name: service-system
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-system
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-code-qna
+  name: service-code-qna
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-code-qna
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-docs
+  name: service-docs
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-docs
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-comment
+  name: service-comment
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-comment
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-code-play
+  name: service-code-play
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-code-play
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-tech-blog
+  name: service-tech-blog
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-tech-blog
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-project
+  name: service-project
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-project
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-api-gateway
+  name: service-api-gateway
+spec:
+  ports:
+    - name: was-port
+      protocol: TCP
+      port: 8092
+      targetPort: 8092
+  selector:
+    app: service-api-gateway
+  type: ClusterIP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-frontend
+  name: service-frontend
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: service-frontend
+  type: ClusterIP
