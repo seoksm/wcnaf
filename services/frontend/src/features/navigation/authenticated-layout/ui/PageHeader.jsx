@@ -1,11 +1,14 @@
 import { WiniStack, WiniTypography, WiniBox, WiniIcon, WiniIconButton } from '@/shared/ui/wini';
-import { HomeIcon, LabelImportantIcon, MenuIcon } from '@/shared/lib';
-import { DrawerHeader } from '@/shared/ui';
+import { HomeIcon, LabelImportantIcon, MenuIcon, HelpOutlineIcon } from '@/shared/lib';
+import { AssetManualDialog, DrawerHeader, useAssetManualDialog } from '@/shared/ui';
 
 /**
  * PageHeader - 인증 레이아웃용 상단 헤더
  */
-export function PageHeader({ title, breadcrumb, isDrawerOpen, isMobile = false, onOpenDrawer }) {
+export function PageHeader({ title, breadcrumb, menuUrl, isDrawerOpen, isMobile = false, onOpenDrawer }) {
+  const { open: isManualOpen, hasManual, activeSectionId, setActiveSectionId, openManual, closeManual } =
+    useAssetManualDialog(menuUrl);
+
   const breadcrumbParts = (() => {
     if (breadcrumb === undefined || breadcrumb === null) {
       return [];
@@ -45,6 +48,12 @@ export function PageHeader({ title, breadcrumb, isDrawerOpen, isMobile = false, 
           >
             {title}
           </WiniTypography>
+
+          {hasManual && (
+            <WiniIconButton onClick={openManual} size="small" aria-label="자산관리 가이드 열기">
+              <HelpOutlineIcon />
+            </WiniIconButton>
+          )}
         </WiniBox>
 
         <WiniStack direction={'row'} alignItems={'center'} flexWrap={'wrap'} gap={1}>
@@ -69,6 +78,15 @@ export function PageHeader({ title, breadcrumb, isDrawerOpen, isMobile = false, 
           ))}
         </WiniStack>
       </WiniBox>
+
+      {hasManual && (
+        <AssetManualDialog
+          open={isManualOpen}
+          activeSectionId={activeSectionId}
+          onSelectSection={setActiveSectionId}
+          onClose={closeManual}
+        />
+      )}
     </DrawerHeader>
   );
 }

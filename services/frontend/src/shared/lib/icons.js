@@ -52,3 +52,6 @@ export { default as PhoneIcon } from '@mui/icons-material/Phone';
 
 // DeleteOutline variant
 export { default as DeleteOutlineIcon } from '@mui/icons-material/DeleteOutline';
+
+// Help & Info Icons
+export { default as HelpOutlineIcon } from '@mui/icons-material/HelpOutline';

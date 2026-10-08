@@ -35,3 +35,6 @@ export { FileListDown } from './blocks/file-download';
 
 // chat
 export { WiniChat } from './blocks/chat';
+
+// Asset manual (자산관리 가이드) dialog
+export { AssetManualDialog, useAssetManualDialog } from './blocks/asset-manual';
