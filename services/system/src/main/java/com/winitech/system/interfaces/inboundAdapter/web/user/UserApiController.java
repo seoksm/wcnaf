@@ -199,7 +199,27 @@ public class UserApiController {
     }
 
     /**
-     * 현재 사용자를 로그아웃합니다. 
+     * MFA(TOTP/백업코드) 2차 인증 검증 - login()에서 mfaRequired=true로 응답받은 뒤 호출한다.
+     * 성공하면 그제서야 세션/JWT가 발급된다. 실패해도 login_log의 잠금 카운트에는 반영하지 않는다
+     * (의도된 정책 결정 - 1차 비밀번호 실패만 계정 잠금으로 이어진다).
+     */
+    @PostMapping("/secondAuth")
+    public CommonResponse secondAuth(HttpServletRequest req, HttpServletResponse res, @RequestBody @Valid UserDto.SecondAuthRequest request) {
+        var result = userFacade.completeMfaLogin(UUID.fromString(request.getMfaChallengeToken()), request.getCode());
+
+        if (result.getRefreshToken() != null) {
+            userSessionFacade.setRefreshTokenCookie(req, res, result.getRefreshToken(), result.getRefreshTokenExpiresIn());
+        }
+
+        result.setRefreshToken(null);
+        result.setRefreshTokenExpiresIn(null);
+        result.setUserSessionId(null);
+
+        return CommonResponse.success(result);
+    }
+
+    /**
+     * 현재 사용자를 로그아웃합니다.
      * Authorization Token이 있는 경우에만 로그아웃 처리를 수행합니다.
      */
     @PostMapping("/logout")

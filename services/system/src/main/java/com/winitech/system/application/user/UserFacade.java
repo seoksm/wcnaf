@@ -168,6 +168,10 @@ public class UserFacade {
         return userTokenDto;
     }
 
+    public UserTokenDto completeMfaLogin(UUID challengeId, String code) {
+        return userService.completeMfaLogin(challengeId, code);
+    }
+
     public void logout(UUID userSessionId){
         userService.logout(userSessionId);
         

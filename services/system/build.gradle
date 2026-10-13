@@ -89,6 +89,7 @@ dependencies {
 
     // common 프로젝트 직접 참조 (기존 JAR 방식에서 변경)
     implementation project(':common')
+    implementation project(':mfa')
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation' // NotE

@@ -29,7 +29,12 @@ public class UserTokenDto {
      * 0이면 당일까지 유효, 0 미만이면 만료된것 (예) -1, -100), 0 초과이면 해당 일수까지 유효
      */
     Integer passwordValidDays;
-    
+
+    /** true면 1차 인증(비밀번호)만 통과한 상태 - accessToken/refreshToken 없이 mfaChallengeToken만 내려간다. */
+    Boolean mfaRequired;
+    /** mfaRequired=true일 때만 값이 있음. POST /user/secondAuth 호출 시 이 값을 그대로 넘긴다. */
+    String mfaChallengeToken;
+
     @JsonIgnore // refreshToken은 사용자에게 반환하지 않음
     String refreshToken;
     

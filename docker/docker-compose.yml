@@ -164,9 +164,14 @@ services:
       WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
       WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
       WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+      # TOTP(MFA) 비밀키 암호화용 대칭키 - 값 자체는 .env(git 미추적)에서 전달된다.
+      # 없거나 너무 짧으면 컨테이너가 기동에 실패한다.
+      WINITECH_MFA_SECRET_KEY: ${WINITECH_MFA_SECRET_KEY}
     volumes:
       - ../services/common/src:/common/src
       - ../services/common/build.gradle:/common/build.gradle
+      - ../services/mfa/src:/mfa/src
+      - ../services/mfa/build.gradle:/mfa/build.gradle
       - ../services/system/src:/app/src
       - ../services/system/build.gradle:/app/build.gradle
       - ../services/system/gradle:/app/gradle

@@ -55,8 +55,24 @@ public class User extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     @NonNull
     private Status status;
-    private OffsetDateTime lastPasswordChangedAt; 
-    
+    private OffsetDateTime lastPasswordChangedAt;
+
+    @Column(name = "totp_enabled", nullable = false)
+    private boolean totpEnabled = false;
+
+    @Column(name = "totp_secret_encrypted")
+    private String totpSecretEncrypted;
+
+    public void enableTotp(String encryptedSecret) {
+        this.totpSecretEncrypted = encryptedSecret;
+        this.totpEnabled = true;
+    }
+
+    public void disableTotp() {
+        this.totpSecretEncrypted = null;
+        this.totpEnabled = false;
+    }
+
     public void setDepartmentId(UUID departmentId) {
         if (departmentId != null) {
             this.department = new Department();

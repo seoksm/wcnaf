@@ -204,6 +204,18 @@ public class UserDto {
 
     @Data
     @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SecondAuthRequest {
+        @ApiModelProperty(value = "1차 인증(login) 응답의 mfaChallengeToken", required = true)
+        @NotEmpty(message = "mfaChallengeToken은 필수 값입니다.")
+        private String mfaChallengeToken;
+        @ApiModelProperty(value = "OTP 앱 6자리 코드 또는 백업코드", example = "123456", required = true)
+        @NotEmpty(message = "코드는 필수 값입니다.")
+        private String code;
+    }
+
+    @Data
+    @NoArgsConstructor
     public static class ResetPasswordRequest {
         @ApiModelProperty(value="새 비밀번호", example = "**********", required = true)
         @NotEmpty(message = "새 비밀번호는 필수 값입니다.")

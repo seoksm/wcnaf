@@ -27,6 +27,8 @@ public interface UserService {
     User.JoinStatus getUserJoinStatus(String username);
     void acceptJoin(UUID id);
     UserTokenDto login(UserCommand.LoginCommand command);
+    /** MFA 2차 인증(TOTP/백업코드) 검증 후 로그인을 완료한다 - secondAuth 엔드포인트에서 호출. */
+    UserTokenDto completeMfaLogin(UUID challengeId, String code);
     void logout(UUID userSessionId);
     Boolean resetUserPassword(UUID id, String newPassword, String clientIp);
     void changeUserPassword(UUID userId, String oldPassword, String newPassword, String clientIp);

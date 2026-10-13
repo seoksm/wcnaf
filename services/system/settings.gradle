@@ -10,3 +10,7 @@ rootProject.name = 'system'
 // common 모듈 포함
 include 'common'
 project(':common').projectDir = new File('../common')
+
+// mfa 모듈 포함 (TOTP/백업코드 등 MFA 전용 - common에는 두지 않음, system만 사용)
+include 'mfa'
+project(':mfa').projectDir = new File('../mfa')

@@ -9,6 +9,8 @@ import com.winitech.system.domain.department.Department;
 import com.winitech.system.domain.department.DepartmentReader;
 import com.winitech.system.domain.loginLog.LoginLogReader;
 //import com.winitech.system.domain.userGroup.UserGroupService;
+import com.winitech.system.domain.userMfa.UserMfaService;
+import com.winitech.system.domain.userMfaChallenge.UserMfaChallenge;
 import com.winitech.system.domain.userOrganization.UserOrganizationInfo;
 import com.winitech.system.domain.userOrganization.UserOrganizationService;
 import com.winitech.system.domain.userPasswordLog.UserPasswordLogCommand;
@@ -59,8 +61,10 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
     private final DepartmentReader departmentReader;
 
     private final LoginLogReader loginLogReader;
-    
+
     private final CommonUserSessionBlockEventProducer commonUserSessionBlockEventProducer;
+
+    private final UserMfaService userMfaService;
 
     @Value("${winitech.security.refresh-token.expires-in-seconds:2592000}")
     private Integer refreshTokenExpiresInSeconds;
@@ -256,7 +260,46 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
             userOrganizationList = userOrganizationService.getUserOrganizationByUserId(user.getId());
         }
         
+        if (user.isTotpEnabled()) {
+            // MFA(TOTP) 사용자 - 개인 선택(opt-in)으로 켠 사용자만 해당. 여기서는 세션/JWT를
+            // 전혀 만들지 않고 "2차 인증 대기" 상태만 돌려준다. 실제 로그인 완료(afterLogin)는
+            // completeMfaLogin()이 코드 검증에 성공한 뒤에만 수행한다.
+            UUID organizationId = userOrganizationList.get(0).getOrganizationId();
+
+            UserMfaChallenge challenge = userMfaService.createChallenge(
+                    user.getId(),
+                    organizationId,
+                    command.getLoginIp(),
+                    command.getIpSecurityStatus(),
+                    command.getSessionEncryptKey()
+            );
+
+            return UserTokenDto.builder()
+                    .mfaRequired(true)
+                    .mfaChallengeToken(challenge.getId().toString())
+                    .build();
+        }
+
         return afterLogin(command, user, userOrganizationList);
+    }
+
+    @Override
+    @Transactional
+    public UserTokenDto completeMfaLogin(UUID challengeId, String code) {
+        UserMfaChallenge challenge = userMfaService.verifyChallenge(challengeId, code);
+
+        User user = userReader.getUser(challenge.getUserId());
+        UserOrganizationInfo userOrganization = userOrganizationService.getUserOrganization(user.getId(), challenge.getOrganizationId());
+
+        UserCommand.LoginCommand command = UserCommand.LoginCommand.builder()
+                .username(user.getUsername())
+                .loginIp(challenge.getLoginIp())
+                .ipSecurityStatus(challenge.getIpSecurityStatus())
+                .sessionEncryptKey(challenge.getSessionEncryptKey())
+                .organizationId(challenge.getOrganizationId())
+                .build();
+
+        return afterLogin(command, user, Arrays.asList(userOrganization));
     }
 
     private UserTokenDto afterLogin(UserCommand.LoginCommand command, User user, List<UserOrganizationInfo> userOrganizationList) {

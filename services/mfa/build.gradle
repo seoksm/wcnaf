@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.5.8'
+    id 'io.spring.dependency-management' version '1.1.3'
+}
+
+group = "com.winitech.wcnaf"
+version = "0.0.5"
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // TOTP(RFC 6238) - Google/Microsoft Authenticator 등 범용 OTP 앱과 호환.
+    // QR 이미지 생성(ZxingPngQrGenerator)은 쓰지 않는다 - otpauth:// URI 문자열만 서버가 내려주고
+    // QR 렌더링은 프론트엔드가 이미 쓰고 있는 qrcode 패키지(자산 QR 라벨 기능)로 그린다.
+    implementation 'dev.samstevens.totp:totp:1.7.1'
+
+    // 백업코드 해싱 (system 모듈의 비밀번호 해싱과 동일한 방식)
+    implementation 'org.mindrot:jbcrypt:0.4'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
