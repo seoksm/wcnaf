@@ -155,6 +155,8 @@ public class UserDto {
         private final User.Status status;
         @ApiModelProperty(value="가입 승인 여부", example = "ACCEPTED", required = true)
         private final User.JoinStatus joinStatus;
+        @ApiModelProperty(value="MFA(TOTP) 사용 여부", example = "false", required = true)
+        private final boolean totpEnabled;
         @ApiModelProperty(value="데이터 생성 시각", example = "2021-11-17T13:46:40.108365", required = true)
         private final OffsetDateTime createAt;
         @ApiModelProperty(value="데이터 수정 시각", example = "2021-11-17T13:46:40.108365", required = true)
@@ -181,6 +183,7 @@ public class UserDto {
             }
             this.status = userInfo.getStatus();
             this.joinStatus = userInfo.getJoinStatus();
+            this.totpEnabled = userInfo.isTotpEnabled();
             this.createAt = userInfo.getCreateAt();
             this.updateAt = userInfo.getUpdateAt();
         }

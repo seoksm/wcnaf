@@ -8,6 +8,7 @@ import {
   acceptUserJoin,
   resetUserPassword,
   unlockUserLogin,
+  reissueUserMfaBackupCodes,
 } from '../api/api';
 
 /**
@@ -241,6 +242,30 @@ export const useEditorActions = (
     }
   }, [connector, selectedUser.username, onSuccess]);
 
+  const handleReissueMfaBackupCodes = useCallback(async () => {
+    if (!selectedUser.id) {
+      await winiMsg.showAlert('사용자를 선택해주세요.');
+      return;
+    }
+
+    const confirm = await winiMsg.showConfirm(
+      'MFA 백업코드를 재발급하시겠습니까?\n기존 백업코드는 모두 무효화됩니다.\n(본인 확인 후에만 진행하세요)',
+    );
+    if (confirm !== 'Y') return;
+
+    try {
+      const data = await reissueUserMfaBackupCodes(connector, selectedUser.id);
+      if (data.result === 'SUCCESS') {
+        const codes = (data.data || []).join('\n');
+        await winiMsg.showAlert(
+          `백업코드가 재발급되었습니다. 본인 확인 후 안전하게 전달하세요.\n\n${codes}`,
+        );
+      }
+    } catch (error) {
+      winiMsg.showAlert(winiCom.getErrorMessage(error.response?.data?.message));
+    }
+  }, [connector, selectedUser.id]);
+
   const handleGridJoinApproval = useCallback(
     async (userId) => {
       const confirm = await winiMsg.showConfirm('가입승인 하시겠습니까?');
@@ -268,6 +293,7 @@ export const useEditorActions = (
     handleAcceptJoin,
     handleResetPassword,
     handleUnlockLogin,
+    handleReissueMfaBackupCodes,
     handleGridJoinApproval,
   };
 };

@@ -3,6 +3,7 @@ import { winiCom } from '@/shared/lib';
 const AUTH_MODE = {
   JWT: 'jwt',
   SESSION: 'session',
+  MFA_REQUIRED: 'mfa_required',
   UNKNOWN: 'unknown',
 };
 const STORAGE_KEYS = {
@@ -105,6 +106,11 @@ export const authAdapter = {
           ? !!accessToken
           : authMode === AUTH_MODE.SESSION,
       accessToken,
+      // mfa_required일 때만 값이 있음 - POST /user/secondAuth 호출 시 그대로 넘겨야 함
+      mfaChallengeToken:
+        authMode === AUTH_MODE.MFA_REQUIRED
+          ? winiCom.toNull(loginResult?.data?.mfaChallengeToken)
+          : null,
     };
   },
 
@@ -142,8 +148,12 @@ const normalizeOrganization = (organization) => ({
   userGroupCode: winiCom.toNull(organization?.userGroupCode),
 });
 
-// 로그인 응답 payload를 보고 JWT 방식인지 세션 방식인지 판별
+// 로그인 응답 payload를 보고 JWT/세션/MFA대기 방식인지 판별
 const resolveAuthMode = (payload) => {
+  if (payload?.mfaRequired) {
+    return AUTH_MODE.MFA_REQUIRED;
+  }
+
   if (payload?.authMode === AUTH_MODE.JWT || payload?.accessToken) {
     return AUTH_MODE.JWT;
   }

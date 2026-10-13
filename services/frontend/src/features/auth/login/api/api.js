@@ -21,3 +21,19 @@ export const login = async (username, password) => {
 
   return response.data;
 };
+
+/**
+ * MFA(TOTP/백업코드) 2차 인증 - login()이 mfaRequired=true로 응답했을 때 호출한다.
+ */
+export const secondAuth = async (mfaChallengeToken, code) => {
+  const connector = new Communicator();
+  connector.client.defaults.headers.common['Authorization'] = null;
+
+  const response = await requestWithEncryption(connector, {
+    method: 'post',
+    url: '/api/v1/system/user/secondAuth',
+    data: { mfaChallengeToken, code },
+  });
+
+  return response.data;
+};

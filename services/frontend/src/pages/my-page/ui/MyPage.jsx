@@ -1,9 +1,10 @@
 import { UserProfileForm } from '@/entities/user';
 import { WiniFormCommon } from '@/shared/ui/blocks/form-layout';
+import { MfaSettingsSection } from '@/features/user/mfa-settings';
 import { useMyPage } from '../model/useMyPage';
 
 export function MyPage() {
-  const { updateProfileModel } = useMyPage();
+  const { updateProfileModel, mfaModel } = useMyPage();
   const { formRef, values, departmentOptions, handlers, handleSubmit, handleReset } = updateProfileModel;
 
   const handleProfileChange = (event) => {
@@ -25,6 +26,7 @@ export function MyPage() {
         onReset={handleReset}
         showActionButtons={true}
       />
+      <MfaSettingsSection mfaModel={mfaModel} />
     </WiniFormCommon>
   );
 }

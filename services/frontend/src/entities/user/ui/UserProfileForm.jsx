@@ -40,6 +40,7 @@ export const UserProfileForm = forwardRef(function UserProfileForm(
         onAcceptJoin,
         onResetPassword,
         onUnlockLogin,
+        onReissueMfaBackupCodes,
         children,
     },
     ref,
@@ -62,7 +63,8 @@ export const UserProfileForm = forwardRef(function UserProfileForm(
             onDelete ||
             onAcceptJoin ||
             onResetPassword ||
-            onUnlockLogin);
+            onUnlockLogin ||
+            onReissueMfaBackupCodes);
 
     return (
         <WiniBox>
@@ -285,7 +287,24 @@ export const UserProfileForm = forwardRef(function UserProfileForm(
                                     </WiniButton>
                                 </WiniBox>,
                             )}
-                        
+
+                        {showAdminOptions &&
+                            onReissueMfaBackupCodes &&
+                            winiCom.checkMenuAut(
+                                ['s', 'i', 'u', 'd'],
+                                <WiniBox ui="btnitem">
+                                    <WiniButton
+                                        variant="outlined"
+                                        className="w-[180px]"
+                                        tabIndex={4}
+                                        onClick={onReissueMfaBackupCodes}
+                                        disabled={!hasSelectedUser}
+                                    >
+                                        MFA 백업코드 재발급
+                                    </WiniButton>
+                                </WiniBox>,
+                            )}
+
                         {shouldShowPasswordChangeButton ? (
                             <WiniBox ui="btnitem">
                                 <WiniButton

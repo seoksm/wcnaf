@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { login } from '../api/api';
+import { login, secondAuth } from '../api/api';
 import { authAdapter } from '@/shared/adapters';
 import loginData from '@/shared/adapters/data/login.json';
 import { winiMsg } from '@/shared/model';
@@ -19,8 +19,38 @@ export const useLogin = () => {
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  // null이 아니면 1차 인증(아이디/비밀번호)은 통과했고 OTP 코드 입력을 기다리는 상태
+  const [mfaChallengeToken, setMfaChallengeToken] = useState(null);
 
   const { id, password } = inputs;
+
+  /**
+   * 로그인(또는 2차 인증) 응답이 최종 성공일 때 공통으로 처리 - 토큰 저장 + 이동
+   */
+  const completeLogin = (userData, authState) => {
+    const org = userData.userOrganizationList[0];
+
+    // Communicator가 생성될 때 헤더에 필요한 값들을 미리 저장
+    if (authState.authMode === 'jwt' && authState.accessToken) {
+      localStorage.setItem('jwtsessiontoken', authState.accessToken);
+    } else {
+      localStorage.removeItem('jwtsessiontoken');
+    }
+    localStorage.setItem('OrgId', org.organizationId);
+    localStorage.setItem('UserId', userData.userId);
+    localStorage.setItem('UserName', userData.fullName);
+    localStorage.setItem('GroupId', org.userGroupId);
+
+    navigate(returnTo, {
+      state: {
+        orgId: org.organizationId,
+        autId: org.userGroupId,
+        username: userData.fullName,
+        name: userData.fullName,
+        userId: userData.userId,
+      },
+    });
+  };
 
   /**
    * 로그인 실행
@@ -36,29 +66,10 @@ export const useLogin = () => {
       const authState = authAdapter.toAuthState(data);
 
       if (authState.isAuthenticated) {
-        const userData = data.data;
-        const org = userData.userOrganizationList[0];
-
-        // Communicator가 생성될 때 헤더에 필요한 값들을 미리 저장
-        if (authState.authMode === 'jwt' && authState.accessToken) {
-          localStorage.setItem('jwtsessiontoken', authState.accessToken);
-        } else {
-          localStorage.removeItem('jwtsessiontoken');
-        }
-        localStorage.setItem('OrgId', org.organizationId);
-        localStorage.setItem('UserId', userData.userId);
-        localStorage.setItem('UserName', userData.fullName);
-        localStorage.setItem('GroupId', org.userGroupId);
-
-        navigate(returnTo, {
-          state: {
-            orgId: userData.userOrganizationList[0].organizationId,
-            autId: userData.userOrganizationList[0].userGroupId,
-            username: userData.fullName,
-            name: userData.fullName,
-            userId: userData.userId,
-          },
-        });
+        completeLogin(data.data, authState);
+      } else if (authState.authMode === 'mfa_required' && authState.mfaChallengeToken) {
+        // 비밀번호는 맞았고 OTP 앱 코드 입력만 남은 상태 - 화면을 코드 입력으로 전환
+        setMfaChallengeToken(authState.mfaChallengeToken);
       } else {
         // authState.isAuthenticated는 authMode가 jwt(토큰 존재)이거나 session일 때만 true다.
         // 여기 도달한다는 것은 authMode가 unknown, 즉 로그인 응답에서 인증 방식을 식별하지
@@ -80,6 +91,41 @@ export const useLogin = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /**
+   * OTP 앱 6자리 코드(또는 백업코드) 검증 - MFA 2단계
+   */
+  const handleVerifyMfaCode = async (code) => {
+    if (!mfaChallengeToken) return;
+
+    setIsLoading(true);
+
+    try {
+      const data = authAdapter.toLoginResult(await secondAuth(mfaChallengeToken, code));
+      const authState = authAdapter.toAuthState(data);
+
+      if (authState.isAuthenticated) {
+        completeLogin(data.data, authState);
+      } else {
+        winiMsg.showAlert('인증 코드가 올바르지 않거나 만료되었습니다.');
+      }
+    } catch (error) {
+      if (error.response) {
+        winiMsg.showAlert(error.response.data?.message || '인증 코드를 확인해주세요.');
+      } else {
+        winiMsg.showAlert('인증 코드를 확인해주세요.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * OTP 코드 입력 화면에서 뒤로가기 - 아이디/비밀번호 입력으로 되돌아간다
+   */
+  const cancelMfa = () => {
+    setMfaChallengeToken(null);
   };
 
   /**
@@ -120,5 +166,8 @@ export const useLogin = () => {
     onInputsReset,
     onKeyDownPassword,
     handleLogin,
+    isMfaRequired: !!mfaChallengeToken,
+    handleVerifyMfaCode,
+    cancelMfa,
   };
 };

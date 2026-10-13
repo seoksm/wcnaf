@@ -1,5 +1,6 @@
 import { WiniBox, WiniGridLayout, WiniCard, WiniGridItem } from '@/shared/ui/wini';
 import { LoginFormSection } from './LoginFormSection';
+import { MfaVerifySection } from './MfaVerifySection';
 import { useLogin } from '@/features/auth/login';
 
 /**
@@ -14,6 +15,9 @@ export const LoginPage = () => {
     onInputsChange,
     onKeyDownPassword,
     handleLogin,
+    isMfaRequired,
+    handleVerifyMfaCode,
+    cancelMfa,
   } = useLogin();
 
   return (
@@ -22,14 +26,22 @@ export const LoginPage = () => {
         <WiniGridItem size={{ xs: 12 }}>
           <WiniBox className="flex justify-center items-center flex-column">
             <WiniCard className="max-w-[330px] min-h-[400px] text-center shadow-none">
-              <LoginFormSection
-                id={id}
-                password={password}
-                isLoading={isLoading}
-                onInputsChange={onInputsChange}
-                onKeyDownPassword={onKeyDownPassword}
-                handleLogin={handleLogin}
-              />
+              {isMfaRequired ? (
+                <MfaVerifySection
+                  isLoading={isLoading}
+                  handleVerifyMfaCode={handleVerifyMfaCode}
+                  cancelMfa={cancelMfa}
+                />
+              ) : (
+                <LoginFormSection
+                  id={id}
+                  password={password}
+                  isLoading={isLoading}
+                  onInputsChange={onInputsChange}
+                  onKeyDownPassword={onKeyDownPassword}
+                  handleLogin={handleLogin}
+                />
+              )}
             </WiniCard>
           </WiniBox>
         </WiniGridItem>

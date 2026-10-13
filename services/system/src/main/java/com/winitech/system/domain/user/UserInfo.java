@@ -33,6 +33,7 @@ public class UserInfo {
     private final User.Status status;
     private final User.JoinStatus joinStatus;
     private final OffsetDateTime lastPasswordChangedAt;
+    private final boolean totpEnabled;
     private final OffsetDateTime createAt;
     private final OffsetDateTime updateAt;
 
@@ -50,6 +51,7 @@ public class UserInfo {
         this.status = user.getStatus();
         this.joinStatus = user.getJoinStatus();
         this.lastPasswordChangedAt = user.getLastPasswordChangedAt();
+        this.totpEnabled = user.isTotpEnabled();
         this.createAt = user.getCreateAt();
         this.updateAt = user.getUpdateAt();
     }

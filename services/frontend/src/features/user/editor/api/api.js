@@ -37,3 +37,12 @@ export const unlockUserLogin = async (connector, params) => {
   const response = await connector.client.patch('/api/v1/system/user/unlockLogin', params);
   return response.data;
 };
+
+/**
+ * MFA(TOTP) 백업코드 재발급 - 기기 분실 등으로 본인 요청을 받은 관리자가 대신 처리한다.
+ * 기존 백업코드는 전부 무효화되고 새 코드 10개가 평문으로 1회 반환된다.
+ */
+export const reissueUserMfaBackupCodes = async (connector, userId) => {
+  const response = await connector.client.post(`/api/v1/system/user/mfa/admin/users/${userId}/backupCodes/reissue`);
+  return response.data;
+};

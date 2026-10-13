@@ -34,6 +34,7 @@ const UserManagementPage = () => {
     handleAcceptJoin,
     handleResetPassword,
     handleUnlockLogin,
+    handleReissueMfaBackupCodes,
     handleGridJoinApproval,
   } = useUserEditor(() => {
     handleSelect(); // 편집 후 목록 새로고침
@@ -68,6 +69,7 @@ const UserManagementPage = () => {
         onAcceptJoin={handleAcceptJoin}
         onResetPassword={handleResetPassword}
         onUnlockLogin={handleUnlockLogin}
+        onReissueMfaBackupCodes={handleReissueMfaBackupCodes}
       />
     </WiniFormNormal>
   );

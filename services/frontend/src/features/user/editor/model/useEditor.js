@@ -97,6 +97,7 @@ export const useEditor = (onSuccess) => {
     handleAcceptJoin,
     handleResetPassword,
     handleUnlockLogin,
+    handleReissueMfaBackupCodes,
     handleGridJoinApproval,
   } = useEditorActions(
     connector,
@@ -119,6 +120,7 @@ export const useEditor = (onSuccess) => {
     handleAcceptJoin,
     handleResetPassword,
     handleUnlockLogin,
+    handleReissueMfaBackupCodes,
     handleGridJoinApproval,
   };
 };
