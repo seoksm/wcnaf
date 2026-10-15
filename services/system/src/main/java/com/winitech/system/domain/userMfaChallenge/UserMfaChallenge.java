@@ -50,6 +50,7 @@ public class UserMfaChallenge extends AbstractEntity {
     @NonNull
     private OffsetDateTime expiresAt;
     private OffsetDateTime consumedAt;
+    private int failCount;
 
     @Builder
     public UserMfaChallenge(
@@ -79,5 +80,15 @@ public class UserMfaChallenge extends AbstractEntity {
 
     public void consume() {
         this.consumedAt = OffsetDateTime.now();
+    }
+
+    /** 코드 검증 실패 1회 기록. 반환값은 이번 실패까지 포함한 누적 실패 횟수. */
+    public int registerFailure() {
+        this.failCount++;
+        return this.failCount;
+    }
+
+    public boolean isFailureLimitExceeded(int maxAttempts) {
+        return failCount >= maxAttempts;
     }
 }

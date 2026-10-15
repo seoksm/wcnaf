@@ -110,10 +110,13 @@ services:
     image: postgres:17.5
     container_name: wcnf-postgres
     ports:
-      - "25432:5432"
+      # 호스트 로컬(127.0.0.1)에서만 접속 가능하도록 제한 - 0.0.0.0 바인딩 시 네트워크상
+      # 누구나 포트에 접근해 자격증명을 시도할 수 있다.
+      - "127.0.0.1:25432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      # 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - postgres/postgres 같은 기본값을 쓰지 않는다.
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - net_wcnf
     restart: always
@@ -131,11 +134,13 @@ services:
       - "28099:8092"
     environment:
       ACTIVE: "docker"
-      # 아래 세 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
+      # 아래 값들은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
       # 없거나 너무 짧으면 컨테이너가 기동에 실패한다. services/common/src/main/resources/default-application.properties 참고.
       WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
       WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
       WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ../services/common/src:/common/src
       - ../services/common/build.gradle:/common/build.gradle
@@ -167,6 +172,8 @@ services:
       # TOTP(MFA) 비밀키 암호화용 대칭키 - 값 자체는 .env(git 미추적)에서 전달된다.
       # 없거나 너무 짧으면 컨테이너가 기동에 실패한다.
       WINITECH_MFA_SECRET_KEY: ${WINITECH_MFA_SECRET_KEY}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ../services/common/src:/common/src
       - ../services/common/build.gradle:/common/build.gradle
@@ -197,11 +204,13 @@ services:
       # 추가해서 넣는다. 없거나 32바이트 미만이면 컨테이너가 기동에 실패한다.
       # 자세한 내용/회전 절차는 services/smart-asset/docs/운영/엑셀_서명키_운영가이드.md 참고.
       SMART_ASSET_EXCEL_SIGNING_KEY: ${SMART_ASSET_EXCEL_SIGNING_KEY}
-      # 아래 세 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
+      # 아래 값들은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
       # 없거나 너무 짧으면 컨테이너가 기동에 실패한다. services/common/src/main/resources/default-application.properties 참고.
       WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
       WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
       WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ../services/common/src:/common/src
       - ../services/common/build.gradle:/common/build.gradle

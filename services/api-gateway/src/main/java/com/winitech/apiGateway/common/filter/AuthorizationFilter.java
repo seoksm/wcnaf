@@ -86,7 +86,7 @@ public class AuthorizationFilter implements GlobalFilter, ApplicationListener<Au
 		if (path != null) {
 			for (String excludedPath : ApiGatewayConstants.EXCLUDE_PATHS) {
 				PathMatcher pathMatcher = new AntPathMatcher();
-				if (pathMatcher.matchStart(excludedPath, path.value())) {
+				if (pathMatcher.match(excludedPath, path.value())) {
 					log.info("Skipping authentication for path: {}", excludedPath);
 					return chain.filter(exchange);
 				}

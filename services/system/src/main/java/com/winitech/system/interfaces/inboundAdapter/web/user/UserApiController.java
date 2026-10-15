@@ -272,7 +272,23 @@ public class UserApiController {
 
 
         if(activeProfile.equals("docker") || activeProfile.equals("local")){
-            return CommonResponse.success(userFacade.devRefreshAccessToken(WiniSecurity.parseLoginUserContext(req)));
+            LoginUserContext devUserContext = WiniSecurity.parseLoginUserContext(req);
+
+            // docker/local 프로파일은 refreshToken 쿠키 없이 액세스토큰 클레임만으로 갱신을 허용하지만,
+            // 로그아웃된 세션까지 갱신을 허용하면 로그아웃이 무력화되므로 세션 상태는 반드시 재검증한다.
+            if (!Boolean.TRUE.equals(userSessionFacade.existLoginSessionBySessionIdAndUserId(devUserContext.getUserSessionId(), devUserContext.getUserId()))) {
+                return CommonResponse.fail(ErrorCode.COMMON_UNAUTHENTICATED, "The session has already been logged out.", HttpStatus.OK.value());
+            }
+
+            if (accessTokenRefreshTimeout != null && accessTokenRefreshTimeout > 0L) {
+                long accessTokenExpiredDuration = Duration.between(devUserContext.getAccessTokenExpiredAt(), OffsetDateTime.now()).toSeconds();
+
+                if (accessTokenExpiredDuration > accessTokenRefreshTimeout) {
+                    return CommonResponse.fail(ErrorCode.COMMON_UNAUTHENTICATED, "Your access token has expired due to inactivity. Please sign in again.", HttpStatus.OK.value());
+                }
+            }
+
+            return CommonResponse.success(userFacade.devRefreshAccessToken(devUserContext));
         }
 
         if (cookies == null) {

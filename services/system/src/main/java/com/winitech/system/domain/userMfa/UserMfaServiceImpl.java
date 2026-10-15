@@ -54,6 +54,11 @@ public class UserMfaServiceImpl implements UserMfaService {
     @Value("${winitech.mfa.challenge-ttl-seconds:180}")
     private int challengeTtlSeconds;
 
+    // TOTP는 6자리(100만 경우의 수)뿐이라 시도횟수 제한이 없으면 챌린지 TTL 내에 무차별 대입이 가능하다.
+    // 한도 초과 시 챌린지를 즉시 소비(폐기)시켜 재로그인(1차 인증)을 다시 거치도록 강제한다.
+    @Value("${winitech.mfa.challenge-max-attempts:5}")
+    private int challengeMaxAttempts;
+
     @Override
     @Transactional
     public UserMfaChallenge createChallenge(
@@ -81,13 +86,21 @@ public class UserMfaServiceImpl implements UserMfaService {
         UserMfaChallenge challenge = userMfaChallengeReader.findById(challengeId)
                 .orElseThrow(UnauthenticatedException::new);
 
-        if (challenge.isConsumed() || challenge.isExpired()) {
+        if (challenge.isConsumed() || challenge.isExpired() || challenge.isFailureLimitExceeded(challengeMaxAttempts)) {
             throw new UnauthenticatedException();
         }
 
         User user = userReader.getUser(challenge.getUserId());
 
         if (!verifyCode(user, code)) {
+            int failCount = challenge.registerFailure();
+
+            if (failCount >= challengeMaxAttempts) {
+                // 시도 횟수 한도 초과 - 챌린지를 즉시 폐기하여 이 토큰으로는 더 이상 시도할 수 없게 한다.
+                challenge.consume();
+            }
+
+            userMfaChallengeStore.store(challenge);
             throw new UnauthenticatedException();
         }
 
