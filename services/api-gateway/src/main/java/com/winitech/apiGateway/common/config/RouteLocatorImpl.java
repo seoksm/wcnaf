@@ -188,7 +188,11 @@ public class RouteLocatorImpl implements RouteLocator {
 						MDC.put(CommonHttpRequestInterceptor.HEADER_REQUEST_UUID_KEY, requestId);
 					}
 
-					mutatedRequest.header(apiGatewayMagicHeader, WiniSecurity.hashMd5(apiGatewayMagicHeaderSecret + requestId));
+					// 매직헤더는 클라이언트가 지정 가능한 requestId가 아니라 게이트웨이가 매번 새로 생성하는
+					// nonce만을 HMAC-SHA256으로 서명한다(표준 키드 MAC, length-extension 등에 안전).
+					String magicNonce = WiniCom.generateRequestId();
+					mutatedRequest.header(CommonHttpRequestInterceptor.HEADER_MAGIC_NONCE_KEY, magicNonce);
+					mutatedRequest.header(apiGatewayMagicHeader, WiniSecurity.hmacSha256Hex(apiGatewayMagicHeaderSecret, magicNonce));
 					
 					ServerWebExchange mutatedExchange = exchange
 							.mutate()

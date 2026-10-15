@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,12 +76,15 @@ public class CommonAuthorizationRequestInterceptor extends HandlerInterceptorAda
 		if (isApiGatewayMode) {
 			// API Gateway 모드에서만 사용
 			String magicHeader = request.getHeader(apiGatewayMagicHeader);
-			String requestId = request.getHeader(CommonHttpRequestInterceptor.HEADER_REQUEST_UUID_KEY);
-			
-			if (magicHeader != null && requestId != null) {
-				String calculatedMagicHeader = WiniSecurity.hashMd5(apiGatewayMagicHeaderSecret + requestId);
-				
-				if (magicHeader.equals(calculatedMagicHeader)) {
+			String magicNonce = request.getHeader(CommonHttpRequestInterceptor.HEADER_MAGIC_NONCE_KEY);
+
+			if (magicHeader != null && magicNonce != null) {
+				String calculatedMagicHeader = WiniSecurity.hmacSha256Hex(apiGatewayMagicHeaderSecret, magicNonce);
+
+				// 타이밍 공격 방지를 위해 MessageDigest.isEqual로 상수시간 비교한다.
+				if (MessageDigest.isEqual(
+						magicHeader.getBytes(StandardCharsets.UTF_8),
+						calculatedMagicHeader.getBytes(StandardCharsets.UTF_8))) {
 					// API Gateway에서 magic header가 일치하는 경우 권한 체크를 하지 않음
 					return super.preHandle(request, response, handler);
 				}

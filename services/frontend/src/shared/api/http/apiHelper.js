@@ -25,7 +25,6 @@ export class WiniRestApiHelper {
       // console.log('!! retrying...');
 
       response.config.headers['Authorization'] = globalAxios.defaults.headers.common['Authorization'];
-      console.log(response.config)
       return this.axios(response.config);
     }
 

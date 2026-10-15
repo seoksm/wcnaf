@@ -56,6 +56,15 @@ public class CommonFileFacade {
 	private Object thumbnailLock = new Object();
 	private int[] thumbnailSize = { 1024, 512, 256, 128, 64, 48, 32 };
 
+	/**
+	 * Zip Slip(경로 조작) 방어 - 저장된 파일명에 경로 조작 문자(../ 등)가 섞여 있어도 ZIP 엔트리
+	 * 이름에서 디렉터리 구성요소를 전부 제거해 압축 해제 시 임의 경로에 쓰이지 않도록 한다.
+	 */
+	private static String sanitizeZipEntryName(String fileName) {
+		String baseName = Paths.get(fileName).getFileName().toString();
+		return baseName.isEmpty() ? "file" : baseName;
+	}
+
     public CommonFileFacade(
 			CommonFileService commonFileService,
 			WiniS3Client winiS3Client,
@@ -273,7 +282,7 @@ public class CommonFileFacade {
 
 		try (ZipOutputStream zipOutputStream = new ZipOutputStream(os)) {
 			for (CommonFileInfo commonFileInfo : commonFileInfoList) {
-				ZipEntry zipEntry = new ZipEntry(commonFileInfo.getFileName());
+				ZipEntry zipEntry = new ZipEntry(sanitizeZipEntryName(commonFileInfo.getFileName()));
 				zipOutputStream.putNextEntry(zipEntry);
 
 				try {
@@ -354,7 +363,7 @@ public class CommonFileFacade {
 				 ZipOutputStream zipOutputStream = new ZipOutputStream(zipFileOutputStream)) {
 
 				for (CommonFileInfo commonFileInfo : commonFileInfoList) {
-					ZipEntry zipEntry = new ZipEntry(commonFileInfo.getFileName());
+					ZipEntry zipEntry = new ZipEntry(sanitizeZipEntryName(commonFileInfo.getFileName()));
 					zipOutputStream.putNextEntry(zipEntry);
 
 					try {

@@ -91,6 +91,17 @@ public class WiniExcel {
 	 * @param dataList Map&lt;String, Object> 형식의 엑셀 데이터 리스트
 	 * @return
 	 */
+	/**
+	 * 엑셀 수식 인젝션(Formula Injection) 방어 - 셀 값이 =, +, -, @ 등으로 시작하면 다른 스프레드시트
+	 * 프로그램/뷰어가 수식으로 재해석할 수 있으므로 선행 작은따옴표를 붙여 텍스트로 고정시킨다.
+	 */
+	private static String sanitizeForFormulaInjection(String value) {
+		if (value != null && !value.isEmpty() && "=+-@\t\r".indexOf(value.charAt(0)) >= 0) {
+			return "'" + value;
+		}
+		return value;
+	}
+
 	public static Workbook createExcelWorkbook(WiniExcelOptions options, List<String> columnList, List<Map<String, Object>> dataList) {
 		List<String> tempColumnList = new ArrayList<>();
 		tempColumnList.addAll(columnList);
@@ -426,7 +437,7 @@ public class WiniExcel {
 											}
 										}
 									} else {
-										xCell.setCellValue(WiniCom.nvl(String.valueOf(dataMap.get(columnArr[0])), ""));
+										xCell.setCellValue(sanitizeForFormulaInjection(WiniCom.nvl(String.valueOf(dataMap.get(columnArr[0])), "")));
 										if ("Y".equals(protectYn)) {
 											xCell.setCellStyle(strProtectStyle);
 										} else {
@@ -435,7 +446,7 @@ public class WiniExcel {
 									}
 								} else {
 									//xCell.setCellValue(EgovStringUtil.null2void((String) dataMap.get(columnList.get(j))));
-									xCell.setCellValue(WiniCom.nvl(String.valueOf(dataMap.get(columnList.get(j))), ""));
+									xCell.setCellValue(sanitizeForFormulaInjection(WiniCom.nvl(String.valueOf(dataMap.get(columnList.get(j))), "")));
 
 									if ("Y".equals(protectYn)) {
 										xCell.setCellStyle(strProtectStyle);
@@ -454,7 +465,7 @@ public class WiniExcel {
 							} catch (Exception e) {
 								log.error(e.toString());
 
-								xCell.setCellValue(WiniCom.nvl(String.valueOf(dataMap.get(columnList.get(j))), ""));
+								xCell.setCellValue(sanitizeForFormulaInjection(WiniCom.nvl(String.valueOf(dataMap.get(columnList.get(j))), "")));
 
 								xCell.setCellStyle(strStyle);
 							}

@@ -17,13 +17,16 @@ export const Buttons = ({
   return (
     <WiniBox className="flex justify-between">
       <WiniBox ui="btnitem">
-        <WiniButton
-          ui="default"
-          onClick={onLoadFromSource}
-          disabled={!selectedProgramMapping || !actionAllList}
-        >
-          소스에서 가져오기
-        </WiniButton>
+        {winiCom.checkMenuAut(
+          'i',
+          <WiniButton
+            ui="default"
+            onClick={onLoadFromSource}
+            disabled={!selectedProgramMapping || !actionAllList}
+          >
+            소스에서 가져오기
+          </WiniButton>,
+        )}
       </WiniBox>
       <WiniBox ui="btnitem">
         {winiCom.checkMenuAut(

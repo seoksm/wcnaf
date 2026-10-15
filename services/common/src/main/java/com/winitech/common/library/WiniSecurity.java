@@ -8,12 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -400,6 +402,28 @@ public class WiniSecurity {
 			sb.append(String.format("%02x", b));
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * API Gateway ↔ 내부 서비스 간 매직헤더 등 서버 간 인증에 사용하는 HMAC-SHA256.
+	 * hashMd5(secret+data) 같은 "비밀값 연결 후 해시" 방식은 표준 MAC 구성이 아니므로
+	 * (키드 해시가 필요한 경우) 이 메서드를 사용한다. 비교는 반드시 MessageDigest.isEqual로
+	 * 타이밍 공격을 방지할 것.
+	 */
+	public static String hmacSha256Hex(String secret, String data) {
+		try {
+			Mac mac = Mac.getInstance("HmacSHA256");
+			mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+			byte[] hashInBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+
+			StringBuilder sb = new StringBuilder();
+			for (byte b : hashInBytes) {
+				sb.append(String.format("%02x", b));
+			}
+			return sb.toString();
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static byte[] hashMd5Bytes(byte[] plainBytes, byte[] salt) {

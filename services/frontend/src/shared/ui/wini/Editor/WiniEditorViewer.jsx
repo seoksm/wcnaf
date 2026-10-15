@@ -1,4 +1,5 @@
 import { useEffect, useRef, forwardRef, Component, createRef } from 'react';
+import DOMPurify from 'dompurify';
 import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
 
 import '@toast-ui/editor/toastui-editor.css';
@@ -76,6 +77,11 @@ const ViewerComponent = forwardRef((props, ref) => {
 
   useEffect(() => {
     viewerInst.current.setMarkdown(props.value || '');
+
+    // Toast UI Editor 자체 살균기만 신뢰하지 않고 DOMPurify로 2차 살균한다(방어심층).
+    if (rootEl.current) {
+      rootEl.current.innerHTML = DOMPurify.sanitize(rootEl.current.innerHTML);
+    }
   }, [props.value]);
 
   useEffect(() => {

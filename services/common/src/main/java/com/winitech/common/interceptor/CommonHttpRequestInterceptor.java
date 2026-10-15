@@ -20,6 +20,13 @@ import java.util.UUID;
 public class CommonHttpRequestInterceptor extends HandlerInterceptorAdapter {
     public static final String HEADER_REQUEST_UUID_KEY = "x-request-id";
 
+    /**
+     * API Gateway 매직헤더 인증 전용 nonce 헤더명. x-request-id는 클라이언트가 임의로 지정할 수
+     * 있어(분산 트레이싱 목적상 의도된 동작) 인증용 MAC의 입력으로 쓰기에 부적합하므로, 게이트웨이가
+     * 매번 자체적으로 생성하는 이 nonce만 매직헤더 계산에 사용한다.
+     */
+    public static final String HEADER_MAGIC_NONCE_KEY = "x-magic-nonce";
+
     private final LoginUserContext loginUserContext;
 
     @Override
