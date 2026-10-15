@@ -1,19 +1,24 @@
-import { useCallback } from 'react';
 import { winiCom, extractUrlPatterns } from '@/shared/lib';
 import { winiMsg } from '@/shared/model';
 import { createProgramAction } from '../api/api';
 
 /**
- * 소스 코드에서 액션 가져오기 훅
+ * 소스 코드에서 액션 가져오기.
+ *
+ * import.meta.glob({ as: 'raw' })로 pages/widgets/features/entities 전체 소스 원문을 읽는
+ * 관리자 전용 개발 도구다. 이 함수가 평소 어디서도 정적 import되지 않고 dev 전용 동적 import로만
+ * 로드되도록 해서(MenuRequestPermissionPage 참고), 운영 빌드 산출물에 전체 소스 원문이 별도
+ * 청크로 포함되는 것을 막는다 - 정적으로 import되면 실행 여부와 무관하게 Vite가 glob을 번들에
+ * 포함시킨다.
  */
-export const useSourceLoader = (
+export const loadActionsFromSource = async (
   selectedProgramData,
   actionAllList,
   onActionChanged,
 ) => {
   const { connector } = winiCom.getFormInfo();
 
-  const loadFromSource = useCallback(async () => {
+  {
     if (!selectedProgramData.mapping || !actionAllList) {
       return;
     }
@@ -260,9 +265,5 @@ export const useSourceLoader = (
     } else {
       winiMsg.showSnackbar('신규 발견된 액션이 없습니다.');
     }
-  }, [selectedProgramData, actionAllList, connector, onActionChanged]);
-
-  return {
-    loadFromSource,
-  };
+  }
 };

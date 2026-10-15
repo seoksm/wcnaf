@@ -9,6 +9,7 @@ import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -49,6 +50,7 @@ public class UserDto {
         @ApiModelProperty(value="직책", example = "사원", required = false)
         private String dutyName;
         @ApiModelProperty(value="비밀번호", example = "**********", required = false)
+        @Size(min = 10, message = "비밀번호는 10자 이상이어야 합니다.")
         private String password;
         //@ApiModelProperty(value="권한", example = "ADMIN", required = false)
         //@NotNull(message = "권한은 필수 값입니다.")
@@ -222,6 +224,7 @@ public class UserDto {
     public static class ResetPasswordRequest {
         @ApiModelProperty(value="새 비밀번호", example = "**********", required = true)
         @NotEmpty(message = "새 비밀번호는 필수 값입니다.")
+        @Size(min = 10, message = "비밀번호는 10자 이상이어야 합니다.")
         private String newPassword;
     }
     
@@ -246,6 +249,7 @@ public class UserDto {
     public static class ChangeUserPasswordRequest {
         @ApiModelProperty(value="새 비밀번호", example = "**********", required = true)
         @NotEmpty(message = "새 비밀번호는 필수 값입니다.")
+        @Size(min = 10, message = "비밀번호는 10자 이상이어야 합니다.")
         private String newPassword;
         @ApiModelProperty(value="기존 비밀번호", example = "**********", required = true)
         @NotEmpty(message = "기존 비밀번호는 필수 값입니다.")

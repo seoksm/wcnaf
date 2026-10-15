@@ -11,6 +11,50 @@ import {
   reissueUserMfaBackupCodes,
 } from '../api/api';
 
+const TEMP_PASSWORD_CHAR_POOLS = {
+  letters: 'abcdefghjkmnpqrstuvwxyz',
+  digits: '23456789',
+  special: '!@#$%&*',
+};
+
+const secureRandomChar = (pool) => {
+  const randomBytes = new Uint32Array(1);
+  window.crypto.getRandomValues(randomBytes);
+  return pool.charAt(randomBytes[0] % pool.length);
+};
+
+const secureShuffle = (chars) => {
+  const arr = [...chars];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const randomBytes = new Uint32Array(1);
+    window.crypto.getRandomValues(randomBytes);
+    const j = randomBytes[0] % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.join('');
+};
+
+/**
+ * 임시 비밀번호 생성 - Math.random() 대신 암호학적으로 안전한 crypto.getRandomValues를 사용한다.
+ * 서버 비밀번호 정책(10자 이상, 영문/숫자/특수문자 중 2종류 이상)을 항상 만족하도록 각 종류를
+ * 최소 1자씩 보장한 뒤 나머지는 전체 알파벳에서 채운다.
+ */
+const generateTempPassword = () => {
+  const allChars =
+    TEMP_PASSWORD_CHAR_POOLS.letters +
+    TEMP_PASSWORD_CHAR_POOLS.digits +
+    TEMP_PASSWORD_CHAR_POOLS.special;
+
+  const guaranteed = [
+    secureRandomChar(TEMP_PASSWORD_CHAR_POOLS.letters),
+    secureRandomChar(TEMP_PASSWORD_CHAR_POOLS.digits),
+    secureRandomChar(TEMP_PASSWORD_CHAR_POOLS.special),
+  ];
+  const rest = Array.from({ length: 9 }, () => secureRandomChar(allChars));
+
+  return secureShuffle([...guaranteed, ...rest]);
+};
+
 /**
  * 사용자 편집 액션
  */
@@ -192,21 +236,7 @@ export const useEditorActions = (
     const confirm = await winiMsg.showConfirm('비밀번호를 초기화하시겠습니까?');
     if (confirm !== 'Y') return;
 
-    const newPassword =
-      Array(4)
-        .fill('')
-        .map(() => {
-          const chars = 'abcdefghjkmnpqrstuvwxyz';
-          return chars.charAt(Math.floor(Math.random() * chars.length));
-        })
-        .join('') +
-      Array(4)
-        .fill('')
-        .map(() => {
-          const chars = '023456789';
-          return chars.charAt(Math.floor(Math.random() * chars.length));
-        })
-        .join('');
+    const newPassword = generateTempPassword();
 
     try {
       const data = await resetUserPassword(connector, selectedUser.id, {

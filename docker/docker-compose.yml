@@ -13,6 +13,10 @@ services:
       # - "4222:4222"    # Client Port
       # - "4244:4244"    # Cluster Port (노드 간 통신)
       # - "28222:8222"    # Monitoring Port (필요 시)
+    environment:
+      # 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일(nats.conf)에 두지 않는다.
+      NATS_MQTT_USERNAME: ${NATS_MQTT_USERNAME}
+      NATS_MQTT_PASSWORD: ${NATS_MQTT_PASSWORD}
     volumes:
       - ./nats.conf:/etc/nats/nats.conf
     # 실행 시 호스트의 이름을 서버 이름으로 사용하거나 직접 지정 가능합니다.
@@ -139,6 +143,7 @@ services:
       WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
       WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
       WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+      WINITECH_SIGNED_FILE_ID_SECRET: ${WINITECH_SIGNED_FILE_ID_SECRET}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
@@ -172,6 +177,7 @@ services:
       # TOTP(MFA) 비밀키 암호화용 대칭키 - 값 자체는 .env(git 미추적)에서 전달된다.
       # 없거나 너무 짧으면 컨테이너가 기동에 실패한다.
       WINITECH_MFA_SECRET_KEY: ${WINITECH_MFA_SECRET_KEY}
+      WINITECH_SIGNED_FILE_ID_SECRET: ${WINITECH_SIGNED_FILE_ID_SECRET}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
@@ -209,6 +215,7 @@ services:
       WINITECH_JWT_SECRET: ${WINITECH_JWT_SECRET}
       WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET: ${WINITECH_API_GATEWAY_MAGIC_HEADER_SECRET}
       WINITECH_ENC_PRIVATE_KEY: ${WINITECH_ENC_PRIVATE_KEY}
+      WINITECH_SIGNED_FILE_ID_SECRET: ${WINITECH_SIGNED_FILE_ID_SECRET}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:

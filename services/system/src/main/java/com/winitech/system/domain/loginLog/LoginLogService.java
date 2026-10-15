@@ -21,6 +21,8 @@ public interface LoginLogService {
 
 	LoginLogInfo searchLastLoginLogByUsernameAndIp(String username, String loginIp);
 
+	LoginLogInfo searchLastLoginLogByUsername(String username);
+
 	void unlockLogin(String username);
 	
 	void unlockLogin(String username, String loginIp);

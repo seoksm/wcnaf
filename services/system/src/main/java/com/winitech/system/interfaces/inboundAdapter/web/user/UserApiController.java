@@ -90,7 +90,7 @@ public class UserApiController {
 //            @ApiImplicitParam(name = "request", value = "수정할 필드", required = true, dataType = "object", paramType = "formData")
 //    })
     @RequestMapping(value = "{id}", method = {RequestMethod.PATCH, RequestMethod.PUT})
-    public CommonResponse modifyUser(@Valid @PathVariable String id, @RequestBody UserDto.UserModifyRequest request) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, JsonProcessingException, KeyManagementException {
+    public CommonResponse modifyUser(@Valid @PathVariable String id, @RequestBody @Valid UserDto.UserModifyRequest request) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, JsonProcessingException, KeyManagementException {
         UserCommand.UserModifyCommand command = request.toCommand();
         UserInfo userInfo = userFacade.modifyUser(UUID.fromString(id), command);
         var response = new UserDto.UserResponse(userInfo);
@@ -359,7 +359,7 @@ public class UserApiController {
     }
 
     @PatchMapping("/{id}/resetPassword")
-    public CommonResponse resetUserPassword(@Valid @PathVariable String id, @RequestBody UserDto.ResetPasswordRequest request, HttpServletRequest req, HttpServletRequest res) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    public CommonResponse resetUserPassword(@Valid @PathVariable String id, @RequestBody @Valid UserDto.ResetPasswordRequest request, HttpServletRequest req, HttpServletRequest res) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         String clientIp = WiniCom.getClientIp(req);
 
         userFacade.resetUserPassword(UUID.fromString(id), request.getNewPassword(), clientIp);
@@ -367,7 +367,7 @@ public class UserApiController {
     }
 
     @PatchMapping("/{id}/changeUserPassword")
-    public CommonResponse changeUserPassword(@Valid @PathVariable UUID id, @RequestBody UserDto.ChangeUserPasswordRequest request, HttpServletRequest req, HttpServletRequest res) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    public CommonResponse changeUserPassword(@Valid @PathVariable UUID id, @RequestBody @Valid UserDto.ChangeUserPasswordRequest request, HttpServletRequest req, HttpServletRequest res) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         String clientIp = WiniCom.getClientIp(req);
 
         UUID userId = loginUserContext.getUserId();
@@ -381,7 +381,7 @@ public class UserApiController {
     }
 
     @PatchMapping("/unlockLogin")
-    public CommonResponse unlockLogin(@RequestBody UserDto.UnlockLoginRequest request) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    public CommonResponse unlockLogin(@RequestBody @Valid UserDto.UnlockLoginRequest request) throws UnirestException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         loginLogFacade.unlockLogin(request.getUsername());
         return CommonResponse.success("OK");
     }

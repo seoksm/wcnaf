@@ -1,5 +1,6 @@
 package com.winitech.common.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;
@@ -21,6 +22,7 @@ import java.util.List;
  * @since : 2024/08/07
  **/
 @Configuration
+@ConditionalOnProperty(name = "winitech.swagger.enabled", havingValue = "true", matchIfMissing = true)
 public class SpringFoxConfig {
 	@Bean
 	public Docket api() {

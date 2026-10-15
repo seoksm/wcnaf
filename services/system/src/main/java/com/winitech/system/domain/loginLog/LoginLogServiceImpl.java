@@ -75,6 +75,16 @@ public class LoginLogServiceImpl extends EgovAbstractServiceImpl implements Logi
 	}
 
 	@Override
+	public LoginLogInfo searchLastLoginLogByUsername(String username) {
+		try {
+			LoginLog loginLog = loginLogReader.getLastLoginLogByUsername(username);
+			return new LoginLogInfo(loginLog);
+		} catch (EntityNotFoundException _ignored) {
+			return null;
+		}
+	}
+
+	@Override
 	public void unlockLogin(String username) {
 		loginLogStore.unlockLoginByUsernameAndIp(username, null);
 	}

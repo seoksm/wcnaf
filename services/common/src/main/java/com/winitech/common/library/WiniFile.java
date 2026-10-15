@@ -139,10 +139,22 @@ public class WiniFile {
 
 	@Getter
 	private static String signedFileIdSecret;
-	
-	@Value("${winitech.security.file.signed-file-id-secret:Wini-wieru9834y9whf}")
+
+	private static final int MIN_SIGNED_FILE_ID_SECRET_LENGTH = 32;
+
+	/**
+	 * 첨부파일 다운로드/미리보기 서명(signedFileId)의 유일한 보호수단이므로 JWT secret과 동일하게
+	 * 코드에 기본값을 두지 않고 환경변수 주입을 강제한다 - 없거나 너무 짧으면 기동을 즉시 실패시킨다.
+	 */
+	@Value("${winitech.security.file.signed-file-id-secret:}")
 	private void setSignedFileIdSecret(String signedFileIdSecret) {
-		this.signedFileIdSecret = signedFileIdSecret;
+		if (signedFileIdSecret == null || signedFileIdSecret.length() < MIN_SIGNED_FILE_ID_SECRET_LENGTH) {
+			throw new IllegalStateException(
+					"winitech.security.file.signed-file-id-secret(환경변수 WINITECH_SIGNED_FILE_ID_SECRET)이 설정되지 않았거나 너무 짧습니다. "
+							+ MIN_SIGNED_FILE_ID_SECRET_LENGTH + "자 이상의 무작위 값이 필요합니다. 예: openssl rand -base64 32");
+		}
+
+		WiniFile.signedFileIdSecret = signedFileIdSecret;
 	}
 
 	@Getter

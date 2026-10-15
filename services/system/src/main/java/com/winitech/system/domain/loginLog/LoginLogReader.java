@@ -15,5 +15,7 @@ public interface LoginLogReader {
 
 	LoginLog getLastLoginLogByUsernameAndIp(String username, String loginIp);
 
+	LoginLog getLastLoginLogByUsername(String username);
+
 	boolean existsTodayLoginLogByUsername(String username);
 }

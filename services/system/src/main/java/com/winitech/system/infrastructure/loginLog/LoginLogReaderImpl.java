@@ -33,6 +33,11 @@ public class LoginLogReaderImpl implements LoginLogReader {
 	}
 
 	@Override
+	public LoginLog getLastLoginLogByUsername(String username) {
+		return loginLogRepository.findFirstByUsernameOrderByIdDesc(username).orElseThrow(EntityNotFoundException::new);
+	}
+
+	@Override
 	public LoginLog getLoginLogById(UUID id) {
 		return loginLogRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 	}

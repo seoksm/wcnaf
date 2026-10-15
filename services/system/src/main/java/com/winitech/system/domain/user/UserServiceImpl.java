@@ -101,6 +101,7 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
         if (userReader.existsByEmail(command.getEmail())) {
             throw new IllegalStatusException("Email already exists");
         }
+        validatePasswordPolicy(command.getPassword());
         User initUser = command.toEntity(
                 command.getDepartmentId() == null ? null : departmentReader.getDepartment(command.getDepartmentId())
         );
@@ -426,6 +427,8 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
     }
     
     private void setUserPassword(User user, String newPassword, String clientIp, boolean shouldCheckPasswordReuse) {
+        validatePasswordPolicy(newPassword);
+
         if (shouldCheckPasswordReuse && passwordReusePreventionCount > 0) {
             // 비밀번호 사용여부 확인
             userPasswordLogService.searchLastNthUserPasswordLogByUserId(user.getId(), passwordReusePreventionCount).forEach(userPasswordLog -> {
@@ -453,6 +456,27 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
         if (passwordHistoryKeepCount > 0) {
             // 비밀번호 변경 로그 정리
             userPasswordLogService.cleanUpUserPasswordLog(user.getId(), passwordHistoryKeepCount);
+        }
+    }
+
+    private static final int MIN_PASSWORD_LENGTH = 10;
+
+    /**
+     * 비밀번호 정책을 서버측에서 강제한다 - 프론트엔드 검증만으로는 API를 직접 호출하는 경우 우회되므로
+     * 가입/재설정/변경 모든 경로가 거치는 지점(registerUser, setUserPassword)에서 재검증한다.
+     */
+    private static void validatePasswordPolicy(String password) {
+        if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
+            throw new IllegalStatusException("비밀번호는 " + MIN_PASSWORD_LENGTH + "자 이상이어야 합니다.");
+        }
+
+        int typeCount = 0;
+        if (password.chars().anyMatch(Character::isLetter)) typeCount++;
+        if (password.chars().anyMatch(Character::isDigit)) typeCount++;
+        if (password.chars().anyMatch(c -> !Character.isLetterOrDigit(c))) typeCount++;
+
+        if (typeCount < 2) {
+            throw new IllegalStatusException("비밀번호는 영문/숫자/특수문자 중 2종류 이상을 조합해야 합니다.");
         }
     }
 

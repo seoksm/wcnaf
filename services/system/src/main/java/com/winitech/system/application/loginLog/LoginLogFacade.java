@@ -53,18 +53,23 @@ public class LoginLogFacade {
 	}
 
 	public void checkUsernameAndIpIsLocked(String username, String loginIp) {
-		LoginLogInfo loginLogInfo = loginLogService.searchLastLoginLogByUsernameAndIp(username, loginIp);
+		// loginIp는 클라이언트가 보내는 X-Forwarded-For 기반이라 조작 가능하다 - IP 기준 잠금만 보면
+		// 매 요청마다 다른 IP를 자처해 잠금을 우회할 수 있으므로, username 단독(IP 무관) 잠금도 병행 체크한다.
+		checkLockUntil(loginLogService.searchLastLoginLogByUsername(username));
+		checkLockUntil(loginLogService.searchLastLoginLogByUsernameAndIp(username, loginIp));
+	}
 
+	private static void checkLockUntil(LoginLogInfo loginLogInfo) {
 		if (loginLogInfo == null || loginLogInfo.getLockUntil() == null || loginLogInfo.getLoginLogStatus() != LoginLog.LoginLogStatus.FAILED) {
 			// 이전의 실패 기록이 없으면 정상 종료
 			return;
 		}
-		
+
 		long lockDuration = loginLogInfo.getLockUntil().toEpochSecond() - OffsetDateTime.now().toEpochSecond();
 
 		if (lockDuration > 0) {
 			// 계정이 잠겨있으면 예외 발생
-			
+
 			throw new UnauthenticatedException(String.format("Your account is locked. Please try again in %d seconds.", lockDuration));
 		}
 	}
@@ -83,8 +88,11 @@ public class LoginLogFacade {
 	}
 	
 	public void addLoginFailLog(String username, String clientIp) {
-		LoginLogInfo loginLogInfo = loginLogService.searchLastLoginLogByUsernameAndIp(username, clientIp);
-		
+		// 시도횟수는 (username, IP) 조합이 아니라 username 단독 기준으로 누적한다 - IP는 클라이언트가
+		// 보내는 X-Forwarded-For 기반이라 조작 가능해서, IP 기준으로 세면 매 요청마다 다른 IP를
+		// 자처해 카운트를 계속 1로 리셋시키는 우회가 가능하기 때문이다.
+		LoginLogInfo loginLogInfo = loginLogService.searchLastLoginLogByUsername(username);
+
 		int nextErrCnt;
 		OffsetDateTime nextLockUntil;
 
@@ -93,7 +101,7 @@ public class LoginLogFacade {
 		} else {
 			nextErrCnt = loginLogInfo.getErrCnt() + 1;
 		}
-		
+
 		if (loginLockCount > 0 && nextErrCnt >= loginLockCount) {
 			nextLockUntil = OffsetDateTime.now().plusSeconds(loginLockDuration);
 		} else {
