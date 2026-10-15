@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { login, secondAuth } from '../api/api';
 import { authAdapter } from '@/shared/adapters';
-import loginData from '@/shared/adapters/data/login.json';
 import { winiMsg } from '@/shared/model';
 
 /**
@@ -61,7 +60,6 @@ export const useLogin = () => {
     try {
       const data = authAdapter.toLoginResult(
         await login(id, password, organizationId),
-        // loginData,
       );
       const authState = authAdapter.toAuthState(data);
 

@@ -2,20 +2,15 @@ package com.winitech.common.library.core;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
 import com.winitech.common.exception.InvalidParamException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,7 +19,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * S3 업로더 클래스
@@ -123,29 +117,6 @@ public class WiniS3Client {
 	}
 
 	/**
-	 * MultipartFile을 S3에 업로드합니다.
-	 * @param multipartFile 업로드할 MultipartFile
-	 * @param objectPath 업로드 오브젝트 파일명이 포함된 경로 (S3 Object name)
-	 * @return 업로드 성공 여부
-	 * @throws IOException
-	 */
-	public boolean directUpload(MultipartFile multipartFile, String objectPath) throws IOException {
-		File uploadFile = convert(multipartFile)
-				.orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File로 전환이 실패했습니다."));
-		return directUpload(uploadFile, objectPath);
-	}
-
-	/**
-	 * File을 S3에 업로드합니다.
-	 * @param uploadFile 업로드할 File
-	 * @param objectPath 업로드 오브젝트 파일명이 포함된 경로 (S3 Object name)
-	 * @return 업로드 성공 여부
-	 */
-	public boolean directUpload(File uploadFile, String objectPath) {
-		return putS3(uploadFile, objectPath);
-	}
-
-	/**
 	 * S3에 업로드된 파일을 바이트 배열로 다운로드합니다.
 	 * @param objectPath 다운로드할 오브젝트 경로 (S3 Object name)
 	 * @return 다운로드된 파일의 바이트 배열
@@ -164,23 +135,4 @@ public class WiniS3Client {
 		return amazonS3Client.getObject(bucket, objectPath).getObjectContent();
 	}
 
-	private boolean putS3(File uploadFile, String objectPath) {
-		amazonS3Client.putObject(
-				new PutObjectRequest(bucket, objectPath, uploadFile)
-						.withCannedAcl(CannedAccessControlList.PublicRead)	// PublicRead 권한으로 업로드 됨
-		);
-		// return amazonS3Client.getUrl(bucket, objectPath).toString();
-		return true;
-	}
-	
-	private Optional<File> convert(MultipartFile file) throws IOException {
-		File convertFile = new File(file.getOriginalFilename());
-		if(convertFile.createNewFile()) {
-			try (FileOutputStream fos = new FileOutputStream(convertFile)) {
-				fos.write(file.getBytes());
-			}
-			return Optional.of(convertFile);
-		}
-		return Optional.empty();
-	}
 }

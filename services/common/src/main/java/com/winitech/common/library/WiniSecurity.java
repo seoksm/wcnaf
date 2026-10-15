@@ -46,9 +46,11 @@ public class WiniSecurity {
 	}
 
 	/**
-	 * jwtSecret은 Base64로 디코드해 HMACSHA512 키 소재로 직접 사용되므로 최소 길이를 강제한다.
+	 * jwtSecret은 Base64로 디코드해 A256CBC-HS512(direct 모드)의 콘텐츠 암호화 키로 직접 쓰인다.
+	 * RFC 7518 기준 A256CBC-HS512는 512비트(64바이트) 키를 요구하므로 최소 길이를 그에 맞춘다
+	 * (32바이트만 요구하면 32~63바이트 키가 통과했다가 jjwt 자체 검증에서 뒤늦게 실패할 수 있음).
 	 */
-	private static final int MIN_JWT_SECRET_BYTES = 32;
+	private static final int MIN_JWT_SECRET_BYTES = 64;
 
 	private static final Logger log = LoggerFactory.getLogger(WiniSecurity.class);
 
@@ -269,6 +271,10 @@ public class WiniSecurity {
 
 		if (authorization == null) {
 			throw new UnauthenticatedException("Authorization token is required");
+		} else if (organizationId == null || organizationId.isEmpty()) {
+			// X-Org-Id 누락 시 이후 organizationId.equals(orgId) 호출에서 NPE가 나는 대신
+			// 의도한 대로 명시적으로 거부한다.
+			throw new UnauthorizedException("Invalid organization id");
 		} else {
 			log.debug("Decoding JWT token...");
 

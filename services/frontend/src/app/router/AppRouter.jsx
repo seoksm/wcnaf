@@ -25,8 +25,13 @@ export function AppRouter() {
           // 개발 환경이고 로컬 환경이면 개발 페이지 라우트
           ENV.IS_DEV && ENV.IS_LOCALHOST && <Route path="/dev" element={<DevPage />} />
         }
-        <Route path="/sample" element={<SampleMain />} />
-        <Route path="/ui-builder" element={<UiBuilderPage />} />
+        {
+          // 컴포넌트 샘플/UI 빌더도 인증 없이 접근 가능한 개발 도구이므로 /dev와 동일하게 제한한다.
+          ENV.IS_DEV && ENV.IS_LOCALHOST && <Route path="/sample" element={<SampleMain />} />
+        }
+        {
+          ENV.IS_DEV && ENV.IS_LOCALHOST && <Route path="/ui-builder" element={<UiBuilderPage />} />
+        }
 
         {/* 인증 필요 라우트 - 동적 메뉴 */}
         <Route element={<AuthGuard />}>

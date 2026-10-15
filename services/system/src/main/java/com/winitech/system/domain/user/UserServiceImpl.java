@@ -45,6 +45,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends EgovAbstractServiceImpl implements UserService{
+    // 존재하지 않는 아이디로 로그인 시도 시에도 BCrypt 연산을 동일하게 수행해, 응답 시간 차이로
+    // 아이디 존재 여부가 드러나지 않도록 한다(login()의 EntityNotFoundException 분기 참고).
+    private static final String DUMMY_BCRYPT_HASH = BCrypt.hashpw("dummy-password-for-timing-equalization", BCrypt.gensalt());
+
     //사용자 저장
     private final UserStore userStore;
     //사용자 조회
@@ -203,8 +207,9 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
         try {
             user = userReader.getUserByUsername(command.getUsername());
         } catch (EntityNotFoundException e) {
-            // 아이디가 없을때와 비밀번호가 다를 때의 오류를 같게하여, 
-            // 공격자가 아이디의 존재 유무를 파악하지 못하도록 함
+            // 아이디가 없을때와 비밀번호가 다를 때의 오류를 같게하여,
+            // 공격자가 아이디의 존재 유무를 파악하지 못하도록 함(응답 내용 + 처리시간 모두 동일하게)
+            BCrypt.checkpw(command.getPassword(), DUMMY_BCRYPT_HASH);
             return null;
         }
         
