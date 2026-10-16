@@ -176,7 +176,10 @@ public class UserMfaServiceImpl implements UserMfaService {
         User user = userReader.getUser(userId);
 
         if (!verifyCode(user, code)) {
-            throw new UnauthenticatedException();
+            // 이미 로그인된 사용자가 현재 세션에서 재확인하는 것이므로 UnauthenticatedException(401,
+            // COMMON_UNAUTHENTICATED)을 쓰면 안 된다 - 프론트가 이 조합을 세션 만료로 해석해
+            // 강제 재로그인시켜 버린다. confirmEnroll과 동일하게 단순 검증 실패로 처리한다.
+            throw new IllegalStatusException("인증 코드가 올바르지 않습니다.");
         }
 
         user.disableTotp();
