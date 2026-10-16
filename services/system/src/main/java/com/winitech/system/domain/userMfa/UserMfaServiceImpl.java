@@ -172,8 +172,13 @@ public class UserMfaServiceImpl implements UserMfaService {
 
     @Override
     @Transactional
-    public void disable(UUID userId) {
+    public void disable(UUID userId, String code) {
         User user = userReader.getUser(userId);
+
+        if (!verifyCode(user, code)) {
+            throw new UnauthenticatedException();
+        }
+
         user.disableTotp();
         userStore.store(user);
         userMfaBackupCodeStore.removeAllByUserId(userId);

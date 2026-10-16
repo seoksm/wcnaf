@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Set;
@@ -691,7 +692,12 @@ public class WiniFile {
 		}
 
 		String fileId = signedFileIdArr[0];
-		if (! signedFileId.equals(getSignedFileId(UUID.fromString(fileId), Instant.ofEpochSecond(expiredAt)))) {
+		String expectedSignedFileId = getSignedFileId(UUID.fromString(fileId), Instant.ofEpochSecond(expiredAt));
+
+		// 타이밍 공격 방지를 위해 MessageDigest.isEqual로 상수시간 비교한다.
+		if (! MessageDigest.isEqual(
+				signedFileId.getBytes(StandardCharsets.UTF_8),
+				expectedSignedFileId.getBytes(StandardCharsets.UTF_8))) {
 			throw new InvalidParamException("Invalid signedFileId");
 		}
 	}
@@ -708,7 +714,9 @@ public class WiniFile {
 
 	public static String getSignedFileId(UUID fileId, Instant expiredAt) {
 		long epochSecond = expiredAt.getEpochSecond();
-		String hashedMd5 = WiniSecurity.hashMd5(signedFileIdSecret + "@" + epochSecond + "$" + fileId + "#" + signedFileIdSecret);
-		return fileId + "_" + epochSecond + "_" + hashedMd5.substring(0, 5) + hashedMd5.substring(hashedMd5.length() - 5);
+		// 표준 키드 MAC(HMAC-SHA256)을 전체 다이제스트(256비트)로 사용한다 - 예전엔 hashMd5(secret+data)
+		// 방식을 40비트로 절단해서 썼는데, WiniSecurity 자체에 "이 패턴 쓰지 말라"는 경고 주석이 있다.
+		String signature = WiniSecurity.hmacSha256Hex(signedFileIdSecret, epochSecond + "$" + fileId);
+		return fileId + "_" + epochSecond + "_" + signature;
 	}
 }

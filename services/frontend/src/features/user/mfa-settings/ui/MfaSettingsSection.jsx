@@ -66,6 +66,37 @@ const CodeConfirmForm = ({ enrollData, isSubmitting, onConfirm, onCancel }) => {
   );
 };
 
+const DisableConfirmForm = ({ isSubmitting, onConfirm, onCancel }) => {
+  const [code, setCode] = useState('');
+
+  return (
+    <WiniBox className="flex flex-col gap-3">
+      <WiniTypography variant="span" className="block text-sm text-text-default">
+        본인 확인을 위해 현재 OTP 앱의 6자리 코드 또는 백업코드를 입력하세요.
+      </WiniTypography>
+
+      <WiniText
+        ui="column"
+        label="코드"
+        name="code"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        disabled={isSubmitting}
+        className="w-full"
+      />
+
+      <WiniBox className="flex gap-2">
+        <WiniButton onClick={() => onConfirm(code)} loading={isSubmitting} disabled={isSubmitting || !code}>
+          해제 확인
+        </WiniButton>
+        <WiniButton ui="lineGray" onClick={onCancel} disabled={isSubmitting}>
+          취소
+        </WiniButton>
+      </WiniBox>
+    </WiniBox>
+  );
+};
+
 const BackupCodesView = ({ backupCodes, onDismiss }) => (
   <WiniBox className="flex flex-col gap-3">
     <WiniTypography variant="span" className="block text-sm font-bold text-red-600">
@@ -89,7 +120,19 @@ const BackupCodesView = ({ backupCodes, onDismiss }) => (
  * 설정 화면 한 군데에만 둔다.
  */
 export const MfaSettingsSection = ({ mfaModel }) => {
-  const { status, enrollData, backupCodes, isSubmitting, startEnroll, confirmEnroll, cancelEnroll, disable, dismissBackupCodes } = mfaModel;
+  const {
+    status,
+    enrollData,
+    backupCodes,
+    isSubmitting,
+    startEnroll,
+    confirmEnroll,
+    cancelEnroll,
+    startDisable,
+    cancelDisable,
+    confirmDisable,
+    dismissBackupCodes,
+  } = mfaModel;
 
   return (
     <WiniBox className="mt-6 rounded border border-solid border-gray-200 p-4">
@@ -128,10 +171,18 @@ export const MfaSettingsSection = ({ mfaModel }) => {
           <WiniTypography variant="span" className="block text-sm text-text-default">
             OTP 앱 2차 인증이 사용 중입니다.
           </WiniTypography>
-          <WiniButton ui="lineGray" onClick={disable} loading={isSubmitting} disabled={isSubmitting} className="w-fit">
+          <WiniButton ui="lineGray" onClick={startDisable} loading={isSubmitting} disabled={isSubmitting} className="w-fit">
             MFA 해제
           </WiniButton>
         </WiniBox>
+      )}
+
+      {status === 'disabling' && (
+        <DisableConfirmForm
+          isSubmitting={isSubmitting}
+          onConfirm={confirmDisable}
+          onCancel={cancelDisable}
+        />
       )}
     </WiniBox>
   );

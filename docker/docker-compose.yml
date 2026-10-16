@@ -168,7 +168,9 @@ services:
       dockerfile: system/Dockerfile
     container_name: service-system
     ports:
-      - "28098:8092"
+      # api-gateway를 거치지 않고 직접 접근하면 게이트웨이의 인증/인가/세션차단을 전부 우회할 수
+      # 있으므로 호스트 로컬에서만 접근 가능하도록 제한한다(로컬 디버깅 목적은 유지).
+      - "127.0.0.1:28098:8092"
     environment:
       ACTIVE: "docker"
       # 아래 세 값은 이 디렉터리의 .env(git 미추적)에서 전달된다 - 값 자체는 git 추적 파일에 두지 않는다.
@@ -204,7 +206,9 @@ services:
       dockerfile: smart-asset/Dockerfile
     container_name: smart-asset
     ports:
-      - "28100:8095"
+      # api-gateway를 거치지 않고 직접 접근하면 게이트웨이의 인증/인가/세션차단을 전부 우회할 수
+      # 있으므로 호스트 로컬에서만 접근 가능하도록 제한한다(로컬 디버깅 목적은 유지).
+      - "127.0.0.1:28100:8095"
     environment:
       ACTIVE: "docker"
       # 유형자산 엑셀 업서트(S-213) preview 서명 키 - 값 자체는 여기(git 추적 파일)에 두지 않고

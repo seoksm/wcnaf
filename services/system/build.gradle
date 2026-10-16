@@ -61,21 +61,25 @@ dependencies {
     )
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    implementation 'com.google.guava:guava:28.2-jre'
+    // 버전을 직접 고정하지 않는다 - Spring Boot의 io.spring.dependency-management 플러그인이
+    // 관리하는 BOM 버전(패치 포함)을 그대로 쓴다. 과거 명시적 버전 고정 때문에 jackson-databind
+    // 2.12.3(CVE-2022-42003/42004 StackOverflow DoS 미패치)/postgresql 42.2.23/logback-classic
+    // 1.2.3(CVE-2021-42550)/guava 28.2-jre(CVE-2023-2976)가 BOM보다 오래된 버전으로 굳어 있었다.
+    implementation 'com.google.guava:guava'
     implementation 'com.mashape.unirest:unirest-java:1.4.9'
-    
+
     // DB 설정
-    runtimeOnly 'org.postgresql:postgresql:42.2.23'
+    runtimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'com.h2database:h2'
-    
+
     // Log 설정
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'ch.qos.logback:logback-classic'
     implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
     implementation 'org.slf4j:log4j-over-slf4j:1.7.13'
     implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'org.springframework.boot:spring-boot-starter-integration'
     implementation 'org.springframework.integration:spring-integration-ip'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
     
     // MyBatis 설정 중 winitech.mybatis.use-auto-mapper-refresh = true로 사용시 오류를 야기하므로 주석처리 함
     // developmentOnly 'org.springframework.boot:spring-boot-devtools'

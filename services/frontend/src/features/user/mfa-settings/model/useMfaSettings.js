@@ -5,10 +5,11 @@ import { winiMsg, userStore } from '@/shared/model';
 import { winiCom } from '@/shared/lib';
 
 /**
- * STATUS: 'loading' | 'disabled' | 'enrolling' | 'enabled'
+ * STATUS: 'loading' | 'disabled' | 'enrolling' | 'enabled' | 'disabling'
  * - disabled: 미사용 - "OTP 앱 등록" 버튼만 노출
  * - enrolling: otpAuthUri/manualEntrySecret으로 QR·수동키 표시 + 코드 확인 입력 대기
  * - enabled: 사용 중 - "해제" 버튼만 노출
+ * - disabling: 해제 전 현재 코드(또는 백업코드) 재확인 입력 대기
  */
 export function useMfaSettings(connector) {
   const connectorRef = useRef(connector);
@@ -78,22 +79,31 @@ export function useMfaSettings(connector) {
     setStatus('disabled');
   }, []);
 
-  const disable = useCallback(async () => {
+  const startDisable = useCallback(async () => {
     const answer = await winiMsg.showConfirm('MFA(OTP 앱) 사용을 해제하시겠습니까?\n기존 백업코드도 모두 폐기됩니다.');
     if (answer !== 'Y') return;
 
+    setStatus('disabling');
+  }, []);
+
+  const cancelDisable = useCallback(() => {
+    setStatus('enabled');
+  }, []);
+
+  // 탈취된 세션만으로 MFA를 영구히 제거하지 못하도록, 해제 직전 현재 코드(또는 백업코드)를 재확인한다.
+  const confirmDisable = useCallback(async (code) => {
     setIsSubmitting(true);
     try {
-      const data = await disableMfa(connectorRef.current);
+      const data = await disableMfa(connectorRef.current, code);
       if (data?.result === 'SUCCESS') {
         setStatus('disabled');
         setBackupCodes(null);
         winiMsg.showSnackbar('MFA가 해제되었습니다.');
       } else {
-        winiMsg.showSnackbar(data?.message || 'MFA 해제 중 오류가 발생했습니다.');
+        winiMsg.showSnackbar(data?.message || '인증 코드가 올바르지 않습니다.');
       }
     } catch (error) {
-      winiMsg.showSnackbar(winiCom.getErrorMessage(error?.response?.data?.message));
+      winiMsg.showSnackbar(winiCom.getErrorMessage(error?.response?.data?.message) || '인증 코드가 올바르지 않습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +119,9 @@ export function useMfaSettings(connector) {
     startEnroll,
     confirmEnroll,
     cancelEnroll,
-    disable,
+    startDisable,
+    cancelDisable,
+    confirmDisable,
     dismissBackupCodes,
   };
 }

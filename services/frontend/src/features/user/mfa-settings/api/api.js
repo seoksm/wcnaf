@@ -12,7 +12,7 @@ export const confirmMfaEnroll = async (connector, code) => {
   return response.data;
 };
 
-export const disableMfa = async (connector) => {
-  const response = await connector.client.post('/api/v1/system/user/mfa/disable');
+export const disableMfa = async (connector, code) => {
+  const response = await connector.client.post('/api/v1/system/user/mfa/disable', { code });
   return response.data;
 };

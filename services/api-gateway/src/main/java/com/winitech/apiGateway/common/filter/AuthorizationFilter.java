@@ -1,6 +1,5 @@
 package com.winitech.apiGateway.common.filter;
 
-import com.google.common.base.Functions;
 import com.winitech.apiGateway.common.config.ApiGatewayConfig;
 import com.winitech.apiGateway.common.config.ApiGatewayConstants;
 import com.winitech.common.bean.LoginUserContext;
@@ -221,7 +220,7 @@ public class AuthorizationFilter implements GlobalFilter, ApplicationListener<Au
 						CommonAuthorizationGroupPermissionInfo::getAuthorizationGroupId,
 						Collectors.toMap(
 								CommonAuthorizationGroupPermissionInfo::getMenuId,
-								Functions.identity()
+								java.util.function.Function.identity()
 						)
 				));
 

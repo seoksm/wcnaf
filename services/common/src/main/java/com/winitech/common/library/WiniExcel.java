@@ -315,7 +315,7 @@ public class WiniExcel {
 				}
 
 				xCell = xRow.createCell(0);
-				xCell.setCellValue(options.getTitle());
+				xCell.setCellValue(sanitizeForFormulaInjection(options.getTitle()));
 				xCell.setCellStyle(titleStyle);
 
 				rowPos = 2;
@@ -350,7 +350,7 @@ public class WiniExcel {
 					xCell = xRow.createCell(colCnt);
 
 					// Header Row 생성
-					xCell.setCellValue(key);
+					xCell.setCellValue(sanitizeForFormulaInjection(key));
 					xCell.setCellStyle(headerStyle);
 
 					//row.createCell(i).setCellStyle(style);

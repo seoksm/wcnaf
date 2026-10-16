@@ -46,10 +46,13 @@ public class UserMfaApiController {
         return CommonResponse.success(userMfaService.confirmEnroll(loginUserContext.getUserId(), request.getCode()));
     }
 
-    /** 본인의 MFA를 해제한다 (기존 백업코드도 전부 폐기됨). */
+    /**
+     * 본인의 MFA를 해제한다 (기존 백업코드도 전부 폐기됨). 탈취된 세션만으로 2차 인증을 영구히
+     * 제거하는 것을 막기 위해 현재 TOTP 코드(또는 백업코드) 재확인을 요구한다.
+     */
     @PostMapping("/disable")
-    public CommonResponse disable() {
-        userMfaService.disable(loginUserContext.getUserId());
+    public CommonResponse disable(@RequestBody @Valid UserMfaDto.CodeRequest request) {
+        userMfaService.disable(loginUserContext.getUserId(), request.getCode());
         return CommonResponse.success("OK");
     }
 

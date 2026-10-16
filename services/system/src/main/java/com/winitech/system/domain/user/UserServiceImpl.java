@@ -169,6 +169,9 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
         User user = userReader.getUser(id);
         user.disable();
         userStore.store(user);
+
+        // 계정을 비활성화해도 이미 발급된 액세스 토큰은 계속 유효할 수 있으므로 즉시 전부 차단한다.
+        invalidateAllSessions(id);
     }
 
     /**
@@ -214,6 +217,9 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
         }
         
         if (user.getHashedPassword() == null) {
+            // 비밀번호가 아직 설정되지 않은 사용자(가입 미완료 등)도 동일하게 더미 연산을 거쳐,
+            // 응답시간으로 "존재하지만 비밀번호가 없는 계정"임을 유추할 수 없게 한다.
+            BCrypt.checkpw(command.getPassword(), DUMMY_BCRYPT_HASH);
             return null;
         }
         
@@ -462,6 +468,19 @@ public class UserServiceImpl extends EgovAbstractServiceImpl implements UserServ
             // 비밀번호 변경 로그 정리
             userPasswordLogService.cleanUpUserPasswordLog(user.getId(), passwordHistoryKeepCount);
         }
+
+        // 비밀번호가 바뀌면 이미 발급된 액세스 토큰(최대 winitech.security.jwt.expires-in-seconds)이
+        // 여전히 유효한 상태로 남아있으면 "비밀번호를 바꿔서 계정을 되찾는다"는 사고대응이 무력화되므로,
+        // 기존 활성 세션을 전부 로그아웃 처리하고 토큰을 즉시 차단한다(afterLogin의 중복로그인 처리와 동일 패턴).
+        invalidateAllSessions(user.getId());
+    }
+
+    private void invalidateAllSessions(UUID userId) {
+        List<UserSessionInfo> activeSessionList = userSessionService.getAllLoginSessionByUserId(userId);
+        activeSessionList.forEach(userSessionInfo -> {
+            userSessionService.logout(userSessionInfo.getId());
+            commonUserSessionBlockEventProducer.userSessionBlocked(userSessionInfo.getId(), userSessionInfo.getRefreshTokenExpiresAt(), userSessionInfo.getUserId());
+        });
     }
 
     private static final int MIN_PASSWORD_LENGTH = 10;

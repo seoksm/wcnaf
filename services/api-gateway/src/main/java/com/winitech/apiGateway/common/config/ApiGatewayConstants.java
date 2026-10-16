@@ -14,14 +14,11 @@ public class ApiGatewayConstants {
 			"/api/v1/system/commonSecurity/generateKeyPair",
 
 			"/api/v1/system/user/login",
-			"/api/v1/system/user/login/admin",
 			"/api/v1/system/user/secondAuth",
 			"/api/v1/system/user/logout",
 			"/api/v1/system/user/join",
 			"/api/v1/system/user/refreshToken",
 			"/api/v1/system/commonSecurity/startRestApiEnc", // 암호화 시작 API
-			"/api/v1/system/user/passwordReset/requestCode",
-			"/api/v1/system/user/passwordReset/verifyAndReset",
 
 			// 첨부파일 다운로드와 미리보기는 파일 ID를 서명하여 별도로 처리
 			"/api/v1/*/commonFile/download/**",

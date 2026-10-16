@@ -29,7 +29,8 @@ public interface UserMfaService {
     /** 등록 확정. 코드 검증 성공 시 totpEnabled=true로 전환하고 백업코드 10개를 발급해 평문으로 1회 반환한다. */
     List<String> confirmEnroll(UUID userId, String code);
 
-    void disable(UUID userId);
+    /** 본인의 현재 TOTP 코드(또는 백업코드) 재확인 후에만 해제한다 - 탈취된 세션만으로 2차 인증을 영구히 제거하는 것을 막는다. */
+    void disable(UUID userId, String code);
 
     /** 관리자 승인 하에만 호출되는 백업코드 재발급 - 기존 코드는 전부 무효화된다. */
     List<String> reissueBackupCodes(UUID userId);

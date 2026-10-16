@@ -370,12 +370,16 @@ public class WiniCom implements ApplicationContextAware {
 			log.info("================================================");
 
 			if (ipAddr != null && !ipAddr.isEmpty() && !"unknown".equalsIgnoreCase(ipAddr)) {
-				// X-Forwarded-For 헤더는 여러 IP를 쉼표로 구분하여 포함할 수 있음
+				// X-Forwarded-For 헤더는 여러 IP를 쉼표로 구분하여 포함할 수 있음 - 쉼표가 없는
+				// 단일 홉 환경에서도 헤더 값을 그대로 써야 한다(과거엔 쉼표가 있을 때만 result에
+				// 대입되는 버그가 있어, 단일 홉 환경에서 IP보안/로그인잠금의 IP 추적이 전부
+				// req.getRemoteAddr()로 조용히 폴백되고 있었다).
 				if (ipAddr.contains(",")) {
 					ipAddr = ipAddr.split(",")[0].trim();
-					result =  ipAddr;
 				}
-//				return ipAddr;
+
+				result = ipAddr;
+				break;
 			}
 		}
 

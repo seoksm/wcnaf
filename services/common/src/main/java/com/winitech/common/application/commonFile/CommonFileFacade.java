@@ -57,12 +57,28 @@ public class CommonFileFacade {
 	private int[] thumbnailSize = { 1024, 512, 256, 128, 64, 48, 32 };
 
 	/**
-	 * Zip Slip(경로 조작) 방어 - 저장된 파일명에 경로 조작 문자(../ 등)가 섞여 있어도 ZIP 엔트리
+	 * Zip Slip(경로 조작) 방어 - 저장된 파일명에 경로 조작 문자(../, ..\ 등)가 섞여 있어도 ZIP 엔트리
 	 * 이름에서 디렉터리 구성요소를 전부 제거해 압축 해제 시 임의 경로에 쓰이지 않도록 한다.
+	 * <p>
+	 * {@link Paths#get(String)}은 JVM 구동 OS의 FileSystemProvider를 따르므로 리눅스 서버에서는
+	 * 백슬래시(\)를 구분자로 인식하지 못해 "..\..\evil.txt" 같은 값이 그대로 통과한다. 또한 경로를
+	 * normalize하지 않아 마지막 구성요소가 ".."/"." 그 자체인 입력(예: "x/..")은 getFileName()이
+	 * ".."/"."을 그대로 반환해버린다. 따라서 OS에 의존하지 않고 직접 두 구분자를 모두 정규화하고,
+	 * 그 결과가 "."/".."이면 거부한다.
 	 */
 	private static String sanitizeZipEntryName(String fileName) {
-		String baseName = Paths.get(fileName).getFileName().toString();
-		return baseName.isEmpty() ? "file" : baseName;
+		if (fileName == null) {
+			return "file";
+		}
+
+		String normalized = fileName.replace('\\', '/');
+		String baseName = normalized.substring(normalized.lastIndexOf('/') + 1);
+
+		if (baseName.isEmpty() || baseName.equals(".") || baseName.equals("..")) {
+			return "file";
+		}
+
+		return baseName;
 	}
 
     public CommonFileFacade(
