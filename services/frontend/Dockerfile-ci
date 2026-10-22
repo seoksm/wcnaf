@@ -2,7 +2,7 @@
 # builder stage
 # -------------
 
-FROM node:20.16.0-bullseye AS builder
+FROM node:24.15.0-bookworm AS builder
 
 # 필요 패키지 설치
 RUN apt-get update && apt-get install -y gzip

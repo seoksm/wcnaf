@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "^24.0.0"
+  },
   "scripts": {
     "start": "vite",
     "dev": "vite",
@@ -25,7 +28,7 @@
     "@toast-ui/editor-plugin-color-syntax": "^3.1.0",
     "@toast-ui/editor-plugin-table-merged-cell": "^3.1.0",
     "@tosspayments/tosspayments-sdk": "^2.5.0",
-    "@types/node": "^22.8.2",
+    "@types/node": "^24.19.2",
     "@vitejs/plugin-react-swc": "~3.7.1",
     "ag-grid-community": "~32.3.1",
     "ag-grid-react": "~32.3.1",
