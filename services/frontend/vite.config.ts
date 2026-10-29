@@ -1,4 +1,5 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
+import { kakaoTestPlugin } from './dev/kakaoTestPlugin';
 import type { Plugin } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import * as fs from 'node:fs';
@@ -54,7 +55,7 @@ function s3ProxyPlugin(): Plugin {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: '/',
   server: {
     host: '0.0.0.0',
@@ -73,6 +74,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    kakaoTestPlugin(loadEnv(mode, process.cwd(), 'KAKAO_TEST_')),
     s3ProxyPlugin(),
     viteTsconfigPaths(),
     tailwindcss(),
@@ -118,4 +120,4 @@ export default defineConfig({
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
   },
   optimizeDeps: {},
-});
+}));
